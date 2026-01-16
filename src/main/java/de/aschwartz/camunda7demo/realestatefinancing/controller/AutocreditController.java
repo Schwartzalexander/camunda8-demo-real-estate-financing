@@ -1,6 +1,5 @@
 package de.aschwartz.camunda7demo.realestatefinancing.controller;
 
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskServiceEnterAutoCreditParameters;
 import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -21,20 +20,16 @@ import java.math.BigDecimal;
 public class AutocreditController {
 
 	private final CreateProcessService createProcessService;
-	private final UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters;
 
 	/**
 	 * Creates the controller with required services.
 	 *
 	 * @param createProcessService process starter service
-	 * @param userTaskServiceEnterAutoCreditParameters service for entering parameters
 	 */
 	public AutocreditController(
-			CreateProcessService createProcessService,
-			UserTaskServiceEnterAutoCreditParameters userTaskServiceEnterAutoCreditParameters
+			CreateProcessService createProcessService
 	) {
 		this.createProcessService = createProcessService;
-		this.userTaskServiceEnterAutoCreditParameters = userTaskServiceEnterAutoCreditParameters;
 	}
 
 	/**
@@ -75,8 +70,14 @@ public class AutocreditController {
 		model.addAttribute("equity", equity);
 
 		try {
-			String processInstanceId = createProcessService.createProcess("RealEstateAutoCredit");
-			userTaskServiceEnterAutoCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity, processInstanceId);
+			String processInstanceId = createProcessService.createProcess(
+					"RealEstateAutoCredit",
+					java.util.Map.of(
+							"monthlyNetIncome", monthlyNetIncome,
+							"propertyValue", propertyValue,
+							"equity", equity
+					)
+			);
 
 			model.addAttribute("processInstanceId", processInstanceId);
 

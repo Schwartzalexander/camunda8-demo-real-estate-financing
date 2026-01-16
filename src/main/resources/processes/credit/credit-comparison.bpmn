@@ -1,144 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-				  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-				  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-				  xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_MaDn_Game"
-				  targetNamespace="http://example.com/mensch-aerger-dich-nicht" exporter="Camunda Modeler"
-				  exporterVersion="5.42.0">
-	<bpmn:process id="Call_Credit_Comparison" name="Real estate credit comparison" isExecutable="true">
-		<bpmn:startEvent id="StartEvent_CreditApplication" name="User starts credit comparison">
-			<bpmn:outgoing>Flow_0ed4lnc</bpmn:outgoing>
-		</bpmn:startEvent>
-		<bpmn:parallelGateway id="Gateway_RequestConditionsAllBanks" name="Request conditions from all banks">
-			<bpmn:incoming>Flow_0ed4lnc</bpmn:incoming>
-			<bpmn:outgoing>Flow_0ufmh5j</bpmn:outgoing>
-			<bpmn:outgoing>Flow_0icz4vr</bpmn:outgoing>
-			<bpmn:outgoing>Flow_0sr4cks</bpmn:outgoing>
-		</bpmn:parallelGateway>
-		<bpmn:sequenceFlow id="Flow_0ed4lnc" sourceRef="StartEvent_CreditApplication"
-						   targetRef="Gateway_RequestConditionsAllBanks"/>
-		<bpmn:serviceTask id="Task_RequestConditionsBankA" name="Request conditions Bank A"
-						  camunda:delegateExpression="${requestConditionsBankADelegate}">
-			<bpmn:incoming>Flow_0ufmh5j</bpmn:incoming>
-			<bpmn:outgoing>Flow_1xus38j</bpmn:outgoing>
-		</bpmn:serviceTask>
-		<bpmn:sequenceFlow id="Flow_0ufmh5j" sourceRef="Gateway_RequestConditionsAllBanks"
-						   targetRef="Task_RequestConditionsBankA"/>
-		<bpmn:sequenceFlow id="Flow_1xus38j" sourceRef="Task_RequestConditionsBankA" targetRef="Gateway_JoinAllBanks"/>
-		<bpmn:serviceTask id="Task_RequestConditionsBankB" name="Request conditions Bank B"
-						  camunda:delegateExpression="${requestConditionsBankBDelegate}">
-			<bpmn:incoming>Flow_0icz4vr</bpmn:incoming>
-			<bpmn:outgoing>Flow_1s08u02</bpmn:outgoing>
-		</bpmn:serviceTask>
-		<bpmn:sequenceFlow id="Flow_0icz4vr" sourceRef="Gateway_RequestConditionsAllBanks"
-						   targetRef="Task_RequestConditionsBankB"/>
-		<bpmn:serviceTask id="Task_RequestConditionsBankC" name="Request conditions Bank C"
-						  camunda:delegateExpression="${requestConditionsBankCDelegate}">
-			<bpmn:incoming>Flow_0sr4cks</bpmn:incoming>
-			<bpmn:outgoing>Flow_0sklhjc</bpmn:outgoing>
-		</bpmn:serviceTask>
-		<bpmn:sequenceFlow id="Flow_0sr4cks" sourceRef="Gateway_RequestConditionsAllBanks"
-						   targetRef="Task_RequestConditionsBankC"/>
-		<bpmn:sequenceFlow id="Flow_1s08u02" sourceRef="Task_RequestConditionsBankB" targetRef="Gateway_JoinAllBanks"/>
-		<bpmn:sequenceFlow id="Flow_0sklhjc" sourceRef="Task_RequestConditionsBankC" targetRef="Gateway_JoinAllBanks"/>
-		<bpmn:endEvent id="EndEvent_ComparisonFinished" name="Credit comparison finished">
-			<bpmn:incoming>Flow_0qj4533</bpmn:incoming>
-		</bpmn:endEvent>
-		<bpmn:sequenceFlow id="Flow_0qj4533" sourceRef="Task_CollectResults" targetRef="EndEvent_ComparisonFinished"/>
-		<bpmn:parallelGateway id="Gateway_JoinAllBanks" name="Join all bank results">
-			<bpmn:incoming>Flow_0sklhjc</bpmn:incoming>
-			<bpmn:incoming>Flow_1xus38j</bpmn:incoming>
-			<bpmn:incoming>Flow_1s08u02</bpmn:incoming>
-			<bpmn:outgoing>Flow_0q8jwl3</bpmn:outgoing>
-		</bpmn:parallelGateway>
-		<bpmn:sequenceFlow id="Flow_0q8jwl3" sourceRef="Gateway_JoinAllBanks" targetRef="Task_CollectResults"/>
-		<bpmn:serviceTask id="Task_CollectResults" name="Collect results"
-						  camunda:delegateExpression="${collectResultsDelegate}">
-			<bpmn:incoming>Flow_0q8jwl3</bpmn:incoming>
-			<bpmn:outgoing>Flow_0qj4533</bpmn:outgoing>
-		</bpmn:serviceTask>
-	</bpmn:process>
-	<bpmndi:BPMNDiagram id="BPMNDiagram_Game">
-		<bpmndi:BPMNPlane id="BPMNPlane_Game" bpmnElement="RealEstateCreditComparison">
-			<bpmndi:BPMNShape id="Shape_StartEvent_GameStarted" bpmnElement="StartEvent_CreditApplication">
-				<dc:Bounds x="180" y="172" width="36" height="36"/>
-				<bpmndi:BPMNLabel>
-					<dc:Bounds x="156" y="222" width="84" height="27"/>
-				</bpmndi:BPMNLabel>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Gateway_1tsju3s_di" bpmnElement="Gateway_RequestConditionsAllBanks">
-				<dc:Bounds x="275" y="165" width="50" height="50"/>
-				<bpmndi:BPMNLabel>
-					<dc:Bounds x="312" y="200" width="75" height="40"/>
-				</bpmndi:BPMNLabel>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Activity_0nmwve7_di" bpmnElement="Task_RequestConditionsBankA">
-				<dc:Bounds x="430" y="40" width="100" height="80"/>
-				<bpmndi:BPMNLabel/>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Activity_1p8wwm5_di" bpmnElement="Task_RequestConditionsBankB">
-				<dc:Bounds x="430" y="150" width="100" height="80"/>
-				<bpmndi:BPMNLabel/>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Activity_1d5a68v_di" bpmnElement="Task_RequestConditionsBankC">
-				<dc:Bounds x="430" y="260" width="100" height="80"/>
-				<bpmndi:BPMNLabel/>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Event_1x950kl_di" bpmnElement="EndEvent_ComparisonFinished">
-				<dc:Bounds x="942" y="172" width="36" height="36"/>
-				<bpmndi:BPMNLabel>
-					<dc:Bounds x="915" y="215" width="90" height="27"/>
-				</bpmndi:BPMNLabel>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Gateway_1927goh_di" bpmnElement="Gateway_JoinAllBanks">
-				<dc:Bounds x="635" y="165" width="50" height="50"/>
-				<bpmndi:BPMNLabel>
-					<dc:Bounds x="679" y="206" width="62" height="27"/>
-				</bpmndi:BPMNLabel>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNShape id="Activity_14zkpkx_di" bpmnElement="Task_CollectResults">
-				<dc:Bounds x="760" y="150" width="100" height="80"/>
-			</bpmndi:BPMNShape>
-			<bpmndi:BPMNEdge id="Flow_0ed4lnc_di" bpmnElement="Flow_0ed4lnc">
-				<di:waypoint x="216" y="190"/>
-				<di:waypoint x="275" y="190"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_0ufmh5j_di" bpmnElement="Flow_0ufmh5j">
-				<di:waypoint x="300" y="165"/>
-				<di:waypoint x="300" y="80"/>
-				<di:waypoint x="430" y="80"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_1xus38j_di" bpmnElement="Flow_1xus38j">
-				<di:waypoint x="530" y="80"/>
-				<di:waypoint x="660" y="80"/>
-				<di:waypoint x="660" y="165"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_0icz4vr_di" bpmnElement="Flow_0icz4vr">
-				<di:waypoint x="325" y="190"/>
-				<di:waypoint x="430" y="190"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_0sr4cks_di" bpmnElement="Flow_0sr4cks">
-				<di:waypoint x="300" y="215"/>
-				<di:waypoint x="300" y="300"/>
-				<di:waypoint x="430" y="300"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_1s08u02_di" bpmnElement="Flow_1s08u02">
-				<di:waypoint x="530" y="190"/>
-				<di:waypoint x="635" y="190"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_0sklhjc_di" bpmnElement="Flow_0sklhjc">
-				<di:waypoint x="530" y="300"/>
-				<di:waypoint x="660" y="300"/>
-				<di:waypoint x="660" y="215"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_0qj4533_di" bpmnElement="Flow_0qj4533">
-				<di:waypoint x="860" y="190"/>
-				<di:waypoint x="942" y="190"/>
-			</bpmndi:BPMNEdge>
-			<bpmndi:BPMNEdge id="Flow_0q8jwl3_di" bpmnElement="Flow_0q8jwl3">
-				<di:waypoint x="685" y="190"/>
-				<di:waypoint x="760" y="190"/>
-			</bpmndi:BPMNEdge>
-		</bpmndi:BPMNPlane>
-	</bpmndi:BPMNDiagram>
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="Definitions_RealEstateCreditComparison"
+                  targetNamespace="http://example.com/real-estate">
+  <bpmn:process id="RealEstateCreditComparison" name="Real estate credit comparison" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_CreditComparison" name="Credit comparison started">
+      <bpmn:outgoing>Flow_StartToParallel</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:parallelGateway id="Gateway_RequestConditionsAllBanks" name="Request conditions from all banks">
+      <bpmn:incoming>Flow_StartToParallel</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToBankA</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ToBankB</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ToBankC</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:serviceTask id="Task_RequestConditionsBankA" name="Request conditions Bank A">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="request-conditions-bank-a" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToBankA</bpmn:incoming>
+      <bpmn:outgoing>Flow_BankAToJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_RequestConditionsBankB" name="Request conditions Bank B">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="request-conditions-bank-b" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToBankB</bpmn:incoming>
+      <bpmn:outgoing>Flow_BankBToJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_RequestConditionsBankC" name="Request conditions Bank C">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="request-conditions-bank-c" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ToBankC</bpmn:incoming>
+      <bpmn:outgoing>Flow_BankCToJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:parallelGateway id="Gateway_JoinAllBanks" name="Join all bank results">
+      <bpmn:incoming>Flow_BankAToJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_BankBToJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_BankCToJoin</bpmn:incoming>
+      <bpmn:outgoing>Flow_JoinToCollect</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:serviceTask id="Task_CollectResults" name="Collect results">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="collect-results" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_JoinToCollect</bpmn:incoming>
+      <bpmn:outgoing>Flow_CollectToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_ComparisonFinished" name="Credit comparison finished">
+      <bpmn:incoming>Flow_CollectToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_StartToParallel" sourceRef="StartEvent_CreditComparison" targetRef="Gateway_RequestConditionsAllBanks" />
+    <bpmn:sequenceFlow id="Flow_ToBankA" sourceRef="Gateway_RequestConditionsAllBanks" targetRef="Task_RequestConditionsBankA" />
+    <bpmn:sequenceFlow id="Flow_ToBankB" sourceRef="Gateway_RequestConditionsAllBanks" targetRef="Task_RequestConditionsBankB" />
+    <bpmn:sequenceFlow id="Flow_ToBankC" sourceRef="Gateway_RequestConditionsAllBanks" targetRef="Task_RequestConditionsBankC" />
+    <bpmn:sequenceFlow id="Flow_BankAToJoin" sourceRef="Task_RequestConditionsBankA" targetRef="Gateway_JoinAllBanks" />
+    <bpmn:sequenceFlow id="Flow_BankBToJoin" sourceRef="Task_RequestConditionsBankB" targetRef="Gateway_JoinAllBanks" />
+    <bpmn:sequenceFlow id="Flow_BankCToJoin" sourceRef="Task_RequestConditionsBankC" targetRef="Gateway_JoinAllBanks" />
+    <bpmn:sequenceFlow id="Flow_JoinToCollect" sourceRef="Gateway_JoinAllBanks" targetRef="Task_CollectResults" />
+    <bpmn:sequenceFlow id="Flow_CollectToEnd" sourceRef="Task_CollectResults" targetRef="EndEvent_ComparisonFinished" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CreditComparison">
+    <bpmndi:BPMNPlane id="BPMNPlane_CreditComparison" bpmnElement="RealEstateCreditComparison">
+      <bpmndi:BPMNShape id="Shape_StartEvent_Comparison" bpmnElement="StartEvent_CreditComparison">
+        <dc:Bounds x="180" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_RequestAll" bpmnElement="Gateway_RequestConditionsAllBanks">
+        <dc:Bounds x="270" y="165" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_BankA" bpmnElement="Task_RequestConditionsBankA">
+        <dc:Bounds x="370" y="60" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_BankB" bpmnElement="Task_RequestConditionsBankB">
+        <dc:Bounds x="370" y="170" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_BankC" bpmnElement="Task_RequestConditionsBankC">
+        <dc:Bounds x="370" y="280" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_JoinAll" bpmnElement="Gateway_JoinAllBanks">
+        <dc:Bounds x="540" y="165" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Collect" bpmnElement="Task_CollectResults">
+        <dc:Bounds x="630" y="150" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_Comparison" bpmnElement="EndEvent_ComparisonFinished">
+        <dc:Bounds x="790" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_StartToParallel" bpmnElement="Flow_StartToParallel">
+        <di:waypoint x="216" y="190" />
+        <di:waypoint x="270" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ToBankA" bpmnElement="Flow_ToBankA">
+        <di:waypoint x="295" y="165" />
+        <di:waypoint x="295" y="100" />
+        <di:waypoint x="370" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ToBankB" bpmnElement="Flow_ToBankB">
+        <di:waypoint x="320" y="190" />
+        <di:waypoint x="370" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ToBankC" bpmnElement="Flow_ToBankC">
+        <di:waypoint x="295" y="215" />
+        <di:waypoint x="295" y="320" />
+        <di:waypoint x="370" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_BankAToJoin" bpmnElement="Flow_BankAToJoin">
+        <di:waypoint x="490" y="100" />
+        <di:waypoint x="565" y="100" />
+        <di:waypoint x="565" y="165" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_BankBToJoin" bpmnElement="Flow_BankBToJoin">
+        <di:waypoint x="490" y="190" />
+        <di:waypoint x="540" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_BankCToJoin" bpmnElement="Flow_BankCToJoin">
+        <di:waypoint x="490" y="320" />
+        <di:waypoint x="565" y="320" />
+        <di:waypoint x="565" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_JoinToCollect" bpmnElement="Flow_JoinToCollect">
+        <di:waypoint x="590" y="190" />
+        <di:waypoint x="630" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_CollectToEnd" bpmnElement="Flow_CollectToEnd">
+        <di:waypoint x="750" y="190" />
+        <di:waypoint x="790" y="190" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>

@@ -1,11 +1,9 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.delegate;
+package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
 
 import de.aschwartz.camunda7demo.realestatefinancing.model.OffersRequest;
 import de.aschwartz.camunda7demo.realestatefinancing.model.OffersResponse;
+import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import lombok.extern.slf4j.Slf4j;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.variable.Variables;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -14,26 +12,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Map;
 
 /**
  * Retrieves the cheapest offer from an external auto-credit API.
  */
-@Component("getCheapestOfferDelegate")
+@Component
 @Slf4j
-public class GetCheapestOfferDelegate implements JavaDelegate {
+public class GetCheapestOfferWorker {
 
 	private final WebClient webClient;
 	private final String baseUrl;
 	private final String apiPath;
 
-	/**
-	 * Creates the delegate with the configured API base URL and path.
-	 *
-	 * @param webClientBuilder web client builder
-	 * @param baseUrl base URL for the API
-	 * @param apiPath API path for offers
-	 */
-	public GetCheapestOfferDelegate(
+	public GetCheapestOfferWorker(
 			WebClient.Builder webClientBuilder,
 			@Value("${camunda7demo.auto-credit.base-url}") String baseUrl,
 			@Value("${camunda7demo.auto-credit.api-path}") String apiPath) {
@@ -42,16 +34,10 @@ public class GetCheapestOfferDelegate implements JavaDelegate {
 		this.apiPath = apiPath;
 	}
 
-	/**
-	 * Calls the external API and stores the cheapest offer as a process variable.
-	 *
-	 * @param execution Camunda delegate execution
-	 */
-	@Override
-	public void execute(DelegateExecution execution) {
-
-		BigDecimal propertyValue = (BigDecimal) execution.getVariable("propertyValue");
-		BigDecimal equity = (BigDecimal) execution.getVariable("equity");
+	@JobWorker(type = "get-cheapest-offer", timeout = 120_000)
+	public Map<String, Object> handle(Map<String, Object> variables) {
+		BigDecimal propertyValue = VariableMapper.getBigDecimal(variables, "propertyValue");
+		BigDecimal equity = VariableMapper.getBigDecimal(variables, "equity");
 
 		BigDecimal kreditbetrag = propertyValue.subtract(equity);
 
@@ -84,8 +70,7 @@ public class GetCheapestOfferDelegate implements JavaDelegate {
 					.bodyToMono(OffersResponse.class)
 					.block();
 		} catch (Exception e) {
-			throw new RuntimeException("API not available: %s".formatted(baseUrl), e
-			);
+			throw new RuntimeException("API not available: %s".formatted(baseUrl), e);
 		}
 
 		if (response == null || response.getAngebote() == null || response.getAngebote().isEmpty()) {
@@ -104,11 +89,6 @@ public class GetCheapestOfferDelegate implements JavaDelegate {
 				cheapestOffer.getAnbieter() != null ? cheapestOffer.getAnbieter().getName() : "n/a",
 				cheapestOffer.getKondition().getMonatlicheRate());
 
-		execution.setVariable(
-				"cheapestOffer",
-				Variables
-						.objectValue(cheapestOffer)
-						.serializationDataFormat(Variables.SerializationDataFormats.JAVA)
-						.create());
+		return Map.of("cheapestOffer", cheapestOffer);
 	}
 }
