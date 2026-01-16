@@ -1,13 +1,10 @@
 package de.aschwartz.camunda7demo.realestatefinancing.controller;
 
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserSignContract;
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskSelectBank;
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskServiceEnterCreditParameters;
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskSubmitApplication;
+import de.aschwartz.camunda7demo.realestatefinancing.camunda.store.ProcessStateStore;
+import de.aschwartz.camunda7demo.realestatefinancing.logic.CreditInteractionService;
 import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
 import de.aschwartz.camunda7demo.realestatefinancing.model.EnterCreditParametersResponse;
 import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
-import de.aschwartz.camunda7demo.realestatefinancing.model.SelectBankResponse;
 import de.aschwartz.camunda7demo.realestatefinancing.model.SubmitApplicationResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -29,29 +27,24 @@ import java.util.List;
 public class CreditController {
 
 	private final CreateProcessService createProcessService;
-	private final UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters;
-	private final UserTaskSelectBank userTaskSelectBank;
-	private final UserTaskSubmitApplication userTaskSubmitApplication;
-	private final UserSignContract userSignContract;
+	private final CreditInteractionService creditInteractionService;
+	private final ProcessStateStore processStateStore;
 
 	/**
 	 * Creates the controller with required services.
 	 *
 	 * @param createProcessService process starter service
-	 * @param userTaskServiceEnterCreditParameters service for entering parameters
-	 * @param userTaskSelectBank service for selecting a bank
-	 * @param userTaskSubmitApplication service for submitting the application
-	 * @param userSignContract service for signing the contract
+	 * @param creditInteractionService service for publishing user events
+	 * @param processStateStore process state store
 	 */
 	public CreditController(
-			CreateProcessService createProcessService, UserTaskServiceEnterCreditParameters userTaskServiceEnterCreditParameters,
-			UserTaskSelectBank userTaskSelectBank,
-			UserTaskSubmitApplication userTaskSubmitApplication, UserSignContract userSignContract) {
+			CreateProcessService createProcessService,
+			CreditInteractionService creditInteractionService,
+			ProcessStateStore processStateStore
+	) {
 		this.createProcessService = createProcessService;
-		this.userSignContract = userSignContract;
-		this.userTaskServiceEnterCreditParameters = userTaskServiceEnterCreditParameters;
-		this.userTaskSelectBank = userTaskSelectBank;
-		this.userTaskSubmitApplication = userTaskSubmitApplication;
+		this.creditInteractionService = creditInteractionService;
+		this.processStateStore = processStateStore;
 	}
 
 	/**
@@ -92,8 +85,18 @@ public class CreditController {
 		model.addAttribute("equity", equity);
 
 		try {
-			String processInstanceId = createProcessService.createProcess("RealEstateCreditApplication");
-			EnterCreditParametersResponse response = userTaskServiceEnterCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity, processInstanceId);
+			String processInstanceId = createProcessService.createProcess(
+					"RealEstateCreditApplication",
+					java.util.Map.of(
+							"monthlyNetIncome", monthlyNetIncome,
+							"propertyValue", propertyValue,
+							"equity", equity
+					)
+			);
+			EnterCreditParametersResponse response = processStateStore
+					.awaitOffers(processInstanceId, Duration.ofSeconds(5))
+					.map(EnterCreditParametersResponse::new)
+					.orElseThrow(() -> new IllegalStateException("No offers received from comparison process."));
 
 			List<Offer> offers = response.getOffers();
 			model.addAttribute("offers", offers);
@@ -118,21 +121,44 @@ public class CreditController {
 	 * @return view name
 	 */
 	@PostMapping("/select")
-	public String selectBankAndSubmit(
+	public String selectBank(
 			@RequestParam String bankName,
+			@RequestParam BigDecimal monthlyNetIncome,
+			@RequestParam BigDecimal propertyValue,
+			@RequestParam BigDecimal equity,
 			@RequestParam String processInstanceId,
 			Model model
 	) {
-		SelectBankResponse selectBankResponse = userTaskSelectBank.selectBank(bankName, processInstanceId);
-		SubmitApplicationResponse submitApplicationResponse = userTaskSubmitApplication.submitApplication(processInstanceId);
+		creditInteractionService.publishBankSelected(processInstanceId, bankName);
+		model.addAttribute("processInstanceId", processInstanceId);
+		model.addAttribute("monthlyNetIncome", monthlyNetIncome);
+		model.addAttribute("propertyValue", propertyValue);
+		model.addAttribute("equity", equity);
+		model.addAttribute("selectedBank", bankName);
+
+		return "credit";
+	}
+
+	/**
+	 * Submits the credit application after a bank was selected.
+	 *
+	 * @param processInstanceId Camunda process instance id
+	 * @param model Spring MVC model
+	 * @return view name
+	 */
+	@PostMapping("/submit")
+	public String submit(@RequestParam String processInstanceId, Model model) {
+		creditInteractionService.publishApplicationSubmitted(processInstanceId);
+		SubmitApplicationResponse submitApplicationResponse = processStateStore
+				.awaitReviewResult(processInstanceId, Duration.ofSeconds(5))
+				.map(result -> new SubmitApplicationResponse(result.isAccepted(), result.getContractNumber(), result.getRejectionReason()))
+				.orElseGet(() -> new SubmitApplicationResponse(false, null, "No review result received."));
 
 		model.addAttribute("processInstanceId", processInstanceId);
-		model.addAttribute("monthlyNetIncome", selectBankResponse.getMonthlyNetIncome());
-		model.addAttribute("propertyValue", selectBankResponse.getPropertyValue());
-		model.addAttribute("equity", selectBankResponse.getEquity());
 		model.addAttribute("applicationAccepted", submitApplicationResponse.getAccepted());
 		model.addAttribute("contractNumber", submitApplicationResponse.getContractNumber());
 		model.addAttribute("rejectionReason", submitApplicationResponse.getRejectionReason());
+		model.addAttribute("showSign", submitApplicationResponse.getAccepted());
 
 		return "credit";
 	}
@@ -147,7 +173,7 @@ public class CreditController {
 	@PostMapping("/sign")
 	public String sign(@RequestParam String processInstanceId, Model model) {
 		try {
-			userSignContract.signContract(processInstanceId);
+			creditInteractionService.publishContractSigned(processInstanceId);
 			model.addAttribute("statusType", "success");
 			model.addAttribute("statusTitle", "Done");
 			model.addAttribute("statusMessage", "Contract signed. Credit contract concluded.");

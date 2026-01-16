@@ -1,8 +1,8 @@
-# Camunda 7 Demo - Real Estate Financing
+# Camunda 8 Demo - Real Estate Financing
 
 ## Overview
 
-This repository contains a Spring Boot + Camunda 7 demo that showcases a real estate financing journey. The demo
+This repository contains a Spring Boot + Camunda 8 demo that showcases a real estate financing journey. The demo
 includes three flows:
 
 - **Credit comparison**: a user enters financing parameters, compares offers from multiple banks, selects one, submits
@@ -13,7 +13,7 @@ includes three flows:
 
 ## Features
 
-- Camunda 7 BPMN processes for credit comparison, auto-credit, and DMN-credit.
+- Camunda 8 BPMN processes for credit comparison, auto-credit, and DMN-credit.
 - DMN-based credibility decisioning for the DMN-credit flow.
 - Thymeleaf UI for entering parameters and interacting with user tasks.
 - External offer lookup for the auto-credit flow.
@@ -43,7 +43,7 @@ The BPMN models are located in `src/main/resources/processes/`:
 - **Credit application** (`src/main/resources/processes/credit/credit-application.bpmn`)
     - Starts when the user submits credit parameters.
     - Calls the credit comparison sub-process to fetch offers.
-    - User selects a bank and submits the application.
+    - User selects a bank and submits the application via UI-driven messages.
     - A service task reviews the application and routes to approval/rejection.
     - On approval, the bank sends a contract and the user signs it.
     - Ends with either a concluded contract or a cancellation.
@@ -66,6 +66,18 @@ The BPMN models are located in `src/main/resources/processes/`:
     - On approval, a contract PDF is created and the process ends as concluded.
     - On rejection, the process ends without a contract.
 
+### Importing the diagrams into Camunda 8 Web Modeler
+
+1. Open Camunda Web Modeler and click **New project**.
+2. Choose **Create process application** to create a new project.
+3. After the project opens, use **Create new ▾ → Upload existing file** (or drag & drop) and select:
+   - `src/main/resources/processes/credit/credit-application.bpmn`
+   - `src/main/resources/processes/credit/credit-comparison.bpmn`
+   - `src/main/resources/processes/autocredit/autocredit.bpmn`
+   - `src/main/resources/processes/dmncredit/dmncredit.bpmn`
+   - `src/main/resources/processes/dmncredit/check-credibility.dmn`
+4. Verify the diagrams render correctly and deploy the process application to your Camunda 8 cluster.
+
 ## UI templates and assets
 
 Thymeleaf templates and static assets live under `src/main/resources/`:
@@ -77,15 +89,24 @@ Thymeleaf templates and static assets live under `src/main/resources/`:
 
 ## Configuration
 
-See `src/main/resources/application.yaml` for configurable settings such as:
+Create an `application.properties` file (or update `src/main/resources/application.yaml`) with your Camunda 8 cluster
+credentials. Example:
 
-- Camunda REST/webapp credentials
+```properties
+camunda.client.mode=saas
+camunda.client.auth.client-id=my-id
+camunda.client.auth.client-secret=my-secret
+camunda.client.cloud.cluster-id=my-cluster-id
+camunda.client.cloud.region=lhr-1
+```
+
+Additional application settings are in `src/main/resources/application.yaml`, such as:
+
 - External auto-credit API endpoints
 - PDF output directory
 
 ## Useful endpoints
 
-- Camunda Webapps: http://localhost:8080/camunda/app/welcome/default/#!/login
-    - Login: `camunda` / `admin`
-- H2 console: http://localhost:8080/h2-console
-    - JDBC URL: `jdbc:h2:mem:camunda`
+- Credit comparison UI: http://localhost:8080/credit
+- Auto-credit UI: http://localhost:8080/autocredit
+- DMN-credit UI: http://localhost:8080/dmncredit

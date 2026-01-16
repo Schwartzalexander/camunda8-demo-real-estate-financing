@@ -1,47 +1,35 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.executionlistener;
+package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
 
 import de.aschwartz.camunda7demo.realestatefinancing.model.OffersResponse;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.ExecutionListener;
+import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Execution listener that creates a random cheapest offer for the DMN credit flow.
+ * Generates a randomized cheapest offer for the DMN credit flow.
  */
-public class CreateRandomCheapestOffer implements ExecutionListener {
+@Component
+public class RandomCheapestOfferWorker {
 
-	public static final String VAR_CHEAPEST_OFFER = "cheapestOffer";
-
-	/**
-	 * Generates a random offer and stores it as a process variable.
-	 *
-	 * @param execution Camunda delegate execution
-	 */
-	@Override
-	public void notify(DelegateExecution execution) {
-		OffersResponse.Angebot angebot = createRandomOffer();
-		execution.setVariable(VAR_CHEAPEST_OFFER, angebot);
+	@JobWorker(type = "generate-cheapest-offer")
+	public Map<String, Object> handle() {
+		return Map.of("cheapestOffer", createRandomOffer());
 	}
 
-	/**
-	 * Builds a randomized offer payload with plausible ranges.
-	 *
-	 * @return generated offer
-	 */
 	private OffersResponse.Angebot createRandomOffer() {
 		ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
-		// --- Terms (plausible values) ---
 		BigDecimal sollZins = bd(rnd.nextDouble(1.5, 6.5), 2);
 		BigDecimal effektivZins = sollZins.add(bd(rnd.nextDouble(0.05, 0.6), 2));
 
-		int zinsbindung = rnd.nextInt(5, 21); // 5..20 years
-		int gesamtlaufzeit = rnd.nextInt(120, 421); // 10..35 years in months
+		int zinsbindung = rnd.nextInt(5, 21);
+		int gesamtlaufzeit = rnd.nextInt(120, 421);
 
 		BigDecimal kaufpreis = bd(rnd.nextDouble(150_000, 1_500_000), 0);
 		BigDecimal darlehensbetrag = bd(kaufpreis.doubleValue() * rnd.nextDouble(0.5, 0.95), 0);
@@ -65,12 +53,10 @@ public class CreateRandomCheapestOffer implements ExecutionListener {
 				.darlehensbetrag(darlehensbetrag)
 				.gesamtkosten(gesamtkosten)
 				.grundbuchkosten(grundbuchkosten)
-				// optional: rough/randomized
 				.zinskostenAmEndeDerZinsbindung(bd(darlehensbetrag.doubleValue() * rnd.nextDouble(0.05, 0.25), 0))
 				.restschuldAmEndeDerZinsbindung(bd(darlehensbetrag.doubleValue() * rnd.nextDouble(0.4, 0.9), 0))
 				.build();
 
-		// --- Provider ---
 		String providerName = pickOne(rnd, List.of(
 				"Münchner Bank", "Bavaria Finance", "Nordlicht Kredit", "AlpenHyp", "MainCapital",
 				"RheinInvest", "Hansekredit", "IsarFunding"
@@ -102,7 +88,6 @@ public class CreateRandomCheapestOffer implements ExecutionListener {
 				.leadmanagementId("LM-" + rnd.nextInt(100000, 999999))
 				.build();
 
-		// --- Product information ---
 		OffersResponse.Angebot.Produktinformation produktinformation = OffersResponse.Angebot.Produktinformation.builder()
 				.minimalerDarlehensbetrag(bd(rnd.nextDouble(25_000, 100_000), 0))
 				.maximalerDarlehensbetrag(bd(rnd.nextDouble(500_000, 3_000_000), 0))
@@ -114,7 +99,6 @@ public class CreateRandomCheapestOffer implements ExecutionListener {
 				.produktId(rnd.nextInt(1000, 9999))
 				.build();
 
-		// --- Offer ---
 		return OffersResponse.Angebot.builder()
 				.vermittler(pickOne(rnd, List.of("Vergleich.de", "TopKredit24", "FinanzScout", "HypoCheck", "RateFinder")))
 				.kondition(kondition)
@@ -124,25 +108,10 @@ public class CreateRandomCheapestOffer implements ExecutionListener {
 				.build();
 	}
 
-	/**
-	 * Converts a double to a scaled {@link BigDecimal}.
-	 *
-	 * @param value input value
-	 * @param scale decimal scale
-	 * @return scaled {@link BigDecimal}
-	 */
 	private static BigDecimal bd(double value, int scale) {
 		return BigDecimal.valueOf(value).setScale(scale, RoundingMode.HALF_UP);
 	}
 
-	/**
-	 * Picks a random element from the given list.
-	 *
-	 * @param rnd random generator
-	 * @param values list of values
-	 * @return randomly chosen value
-	 * @param <T> value type
-	 */
 	private static <T> T pickOne(ThreadLocalRandom rnd, List<T> values) {
 		return values.get(rnd.nextInt(values.size()));
 	}

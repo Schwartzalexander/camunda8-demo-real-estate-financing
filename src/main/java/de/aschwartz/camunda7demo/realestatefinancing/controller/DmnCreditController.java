@@ -1,6 +1,5 @@
 package de.aschwartz.camunda7demo.realestatefinancing.controller;
 
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.usertask.UserTaskServiceEnterDmnCreditParameters;
 import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -21,20 +20,16 @@ import java.math.BigDecimal;
 public class DmnCreditController {
 
 	private final CreateProcessService createProcessService;
-	private final UserTaskServiceEnterDmnCreditParameters userTaskServiceEnterDmnCreditParameters;
 
 	/**
 	 * Creates the controller with required services.
 	 *
 	 * @param createProcessService                    process starter service
-	 * @param userTaskServiceEnterDmnCreditParameters service for entering parameters
 	 */
 	public DmnCreditController(
-			CreateProcessService createProcessService,
-			UserTaskServiceEnterDmnCreditParameters userTaskServiceEnterDmnCreditParameters
+			CreateProcessService createProcessService
 	) {
 		this.createProcessService = createProcessService;
-		this.userTaskServiceEnterDmnCreditParameters = userTaskServiceEnterDmnCreditParameters;
 	}
 
 	/**
@@ -75,8 +70,14 @@ public class DmnCreditController {
 		model.addAttribute("equity", equity);
 
 		try {
-			String processInstanceId = createProcessService.createProcess("RealEstateDmnCredit");
-			userTaskServiceEnterDmnCreditParameters.enterCreditParameters(monthlyNetIncome, propertyValue, equity, processInstanceId);
+			String processInstanceId = createProcessService.createProcess(
+					"RealEstateDmnCredit",
+					java.util.Map.of(
+							"monthlyNetIncome", monthlyNetIncome,
+							"propertyValue", propertyValue,
+							"equity", equity
+					)
+			);
 
 			model.addAttribute("processInstanceId", processInstanceId);
 

@@ -72,6 +72,19 @@
             </div>
         </section>
 
+        <section class="status" th:if="${selectedBank != null and applicationAccepted == null}">
+            <div class="status-box info">
+                <span class="status-title">Bank selected</span>
+                <p class="status-text">
+                    You selected <strong th:text="${selectedBank}">Bank</strong>. Submit the application to continue.
+                </p>
+                <form th:action="@{/credit/submit}" method="post" class="actions">
+                    <input type="hidden" name="processInstanceId" th:value="${processInstanceId}"/>
+                    <button class="btn primary" type="submit">Submit application</button>
+                </form>
+            </div>
+        </section>
+
         <section class="status" th:if="${statusMessage != null}">
             <div class="status-box" th:classappend="${statusType}">
                 <span class="status-title" th:text="${statusTitle}">Status</span>
@@ -112,7 +125,7 @@
     </main>
 
     <footer class="footer">
-        <span>Camunda BPM + Spring Boot + Thymeleaf demo</span>
+        <span>Camunda 8 + Spring Boot + Thymeleaf demo</span>
     </footer>
 </div>
 </body>

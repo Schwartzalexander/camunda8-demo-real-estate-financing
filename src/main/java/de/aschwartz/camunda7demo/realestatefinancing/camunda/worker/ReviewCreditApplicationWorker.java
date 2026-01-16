@@ -1,66 +1,78 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.delegate;
+package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.aschwartz.camunda7demo.realestatefinancing.camunda.store.ProcessStateStore;
 import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
 import de.aschwartz.camunda7demo.realestatefinancing.model.ReviewResult;
+import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import lombok.extern.slf4j.Slf4j;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Reviews a selected offer and sets acceptance decision variables.
  */
-@Component("reviewCreditApplicationDelegate")
+@Component
 @Slf4j
-public class ReviewCreditApplicationDelegate implements JavaDelegate {
+public class ReviewCreditApplicationWorker {
 
-	/**
-	 * Executes the credit application review.
-	 *
-	 * @param execution Camunda delegate execution
-	 */
-	@Override
-	public void execute(DelegateExecution execution) {
+	private final ProcessStateStore processStateStore;
+	private final ObjectMapper objectMapper;
 
-		@SuppressWarnings("unchecked")
-		List<Offer> offers = (List<Offer>) execution.getVariable("creditOffers");
-		String bankName = (String) execution.getVariable("bankName");
-		BigDecimal monthlyNetIncome = (BigDecimal) execution.getVariable("monthlyNetIncome");
-		BigDecimal propertyValue = (BigDecimal) execution.getVariable("propertyValue");
-		BigDecimal equity = (BigDecimal) execution.getVariable("equity");
+	public ReviewCreditApplicationWorker(ProcessStateStore processStateStore, ObjectMapper objectMapper) {
+		this.processStateStore = processStateStore;
+		this.objectMapper = objectMapper;
+	}
 
-		Offer selectedOffer = offers.stream().filter(it -> it.getBankName().equals(bankName)).findFirst().orElseThrow(() ->
-				new RuntimeException("Invalid Offer. Bankname %s not found".formatted(bankName))
-		);
+	@JobWorker(type = "review-credit-application")
+	public Map<String, Object> handle(Map<String, Object> variables) {
+		List<Offer> offers = readOffers(variables.get("creditOffers"));
+		String bankName = VariableMapper.getString(variables, "bankName");
+		BigDecimal monthlyNetIncome = VariableMapper.getBigDecimal(variables, "monthlyNetIncome");
+		BigDecimal propertyValue = VariableMapper.getBigDecimal(variables, "propertyValue");
+		BigDecimal equity = VariableMapper.getBigDecimal(variables, "equity");
+
+		Offer selectedOffer = offers.stream()
+				.filter(it -> it.getBankName().equals(bankName))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Invalid Offer. Bankname %s not found".formatted(bankName)));
 
 		ReviewResult result = reviewApplication(monthlyNetIncome, propertyValue, equity, selectedOffer);
 
-		execution.setVariable("applicationAccepted", result.isAccepted());
-		execution.setVariable("contractNumber", result.getContractNumber());
-		execution.setVariable("rejectionReason", result.getRejectionReason());
+		String correlationId = VariableMapper.getString(variables, "correlationId");
+		if (correlationId != null) {
+			processStateStore.storeReviewResult(correlationId, result);
+		}
+
+		return Map.of(
+				"applicationAccepted", result.isAccepted(),
+				"contractNumber", result.getContractNumber(),
+				"rejectionReason", result.getRejectionReason()
+		);
 	}
 
-	/**
-	 * Applies basic validation and scoring to determine acceptance.
-	 *
-	 * @param monthlyNetIncome monthly net income
-	 * @param propertyValue property value
-	 * @param equity equity amount
-	 * @param selectedOffer selected offer
-	 * @return review result
-	 */
+	@SuppressWarnings("unchecked")
+	private List<Offer> readOffers(Object offersObject) {
+		if (offersObject == null) {
+			throw new IllegalStateException("No offers available");
+		}
+		if (offersObject instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof Offer) {
+			return (List<Offer>) list;
+		}
+		return objectMapper.convertValue(offersObject, objectMapper.getTypeFactory().constructCollectionType(List.class, Offer.class));
+	}
+
 	private ReviewResult reviewApplication(
 			BigDecimal monthlyNetIncome,
 			BigDecimal propertyValue,
 			BigDecimal equity,
 			Offer selectedOffer
 	) {
-		// --- Basic validation (Demo-safe) ---
 		if (monthlyNetIncome == null || propertyValue == null || equity == null || selectedOffer == null)
 			return ReviewResult.rejected("Missing input");
 		if (monthlyNetIncome.compareTo(BigDecimal.ZERO) <= 0)
@@ -74,16 +86,13 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 		if (selectedOffer.getInterestRate() == null || selectedOffer.getInterestRate().compareTo(BigDecimal.ZERO) <= 0)
 			return ReviewResult.rejected("Interest rate must be > 0");
 
-		// --- Derived values ---
 		BigDecimal loanAmount = propertyValue.subtract(equity);
 		BigDecimal equityRatio = equity.divide(propertyValue, 6, RoundingMode.HALF_UP);
 		BigDecimal ltv = loanAmount.divide(propertyValue, 6, RoundingMode.HALF_UP);
 
-		// interestRate is percent (e.g. 3.5 -> 3.5%)
 		BigDecimal annualRate = selectedOffer.getInterestRate().divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP);
 		BigDecimal monthlyRate = annualRate.divide(new BigDecimal("12"), 10, RoundingMode.HALF_UP);
 
-		// --- Monthly payment approximation (annuity) ---
 		int months = 30 * 12;
 
 		BigDecimal onePlusR = BigDecimal.ONE.add(monthlyRate);
@@ -103,7 +112,6 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 
 		BigDecimal dti = monthlyPayment.divide(monthlyNetIncome, 6, RoundingMode.HALF_UP);
 
-		// --- Hard rejects with reasons ---
 		if (equityRatio.compareTo(new BigDecimal("0.10")) < 0)
 			return ReviewResult.rejected("Equity ratio too low (< 10%)");
 		if (ltv.compareTo(new BigDecimal("0.90")) > 0)
@@ -111,7 +119,6 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 		if (dti.compareTo(new BigDecimal("0.35")) > 0)
 			return ReviewResult.rejected("Monthly payment too high (> 35% of net income)");
 
-		// --- Soft scoring (demo) ---
 		int score = 0;
 
 		if (equityRatio.compareTo(new BigDecimal("0.20")) >= 0) score += 2;
@@ -130,12 +137,6 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 		return ReviewResult.rejected("Score too low (risk too high)");
 	}
 
-	/**
-	 * Generates a contract number using the bank name and a random suffix.
-	 *
-	 * @param bankName bank name
-	 * @return generated contract number
-	 */
 	private String generateContractNumber(String bankName) {
 		String bankCode = bankName == null
 				? "BANK"
@@ -147,5 +148,4 @@ public class ReviewCreditApplicationDelegate implements JavaDelegate {
 				+ "-"
 				+ UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 	}
-
 }
