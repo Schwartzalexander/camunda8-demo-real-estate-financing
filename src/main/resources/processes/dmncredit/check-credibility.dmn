@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="http://www.omg.org/spec/DMN/20151101/DMNDI.xsd" xmlns:di="http://www.omg.org/spec/DMN/20151101/DI.xsd" xmlns:dc="http://www.omg.org/spec/DMN/20151101/DC.xsd" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="checkCredibilityDecisionDefinition" name="DRD" namespace="http://example.com/dmn" exporter="Camunda Modeler" exporterVersion="5.42.0">
+  <decision id="checkCredibilityDecision" name="Check Credibility Decision">
+    <decisionTable id="DecisionTable_1o8sp4u" hitPolicy="FIRST">
+      <input id="Input_1">
+        <inputExpression id="InputExpression_1" typeRef="long">
+          <text>monthlyNetIncome</text>
+        </inputExpression>
+      </input>
+      <input id="Input_2">
+        <inputExpression id="InputExpression_2" typeRef="long">
+          <text>propertyValue</text>
+        </inputExpression>
+      </input>
+      <input id="Input_3">
+        <inputExpression id="InputExpression_3" typeRef="long">
+          <text>equity</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" name="decision" typeRef="boolean" />
+      <rule id="Rule_1">
+        <inputEntry id="Rule_1_in_1">
+          <text>&gt; 2000</text>
+        </inputEntry>
+        <inputEntry id="Rule_1_in_2">
+          <text>&lt; 1000000</text>
+        </inputEntry>
+        <inputEntry id="Rule_1_in_3">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="Rule_1_out">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_2">
+        <inputEntry id="Rule_2_in_1">
+          <text>&lt; 2000</text>
+        </inputEntry>
+        <inputEntry id="Rule_2_in_2">
+          <text>&lt; 1000000</text>
+        </inputEntry>
+        <inputEntry id="Rule_2_in_3">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="Rule_2_out">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_3">
+        <inputEntry id="Rule_3_in_1">
+          <text>&gt; 5000</text>
+        </inputEntry>
+        <inputEntry id="Rule_3_in_2">
+          <text>&gt; 1000000</text>
+        </inputEntry>
+        <inputEntry id="Rule_3_in_3">
+          <text>&lt; 10000</text>
+        </inputEntry>
+        <outputEntry id="Rule_3_out">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_4">
+        <inputEntry id="Rule_4_in_1">
+          <text>&lt; 5000</text>
+        </inputEntry>
+        <inputEntry id="Rule_4_in_2">
+          <text>&gt; 1000000</text>
+        </inputEntry>
+        <inputEntry id="Rule_4_in_3">
+          <text>&gt; 100000</text>
+        </inputEntry>
+        <outputEntry id="Rule_4_out">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_5">
+        <inputEntry id="Rule_5_in_1">
+          <text>&lt; 5000</text>
+        </inputEntry>
+        <inputEntry id="Rule_5_in_2">
+          <text>&gt; 1000000</text>
+        </inputEntry>
+        <inputEntry id="Rule_5_in_3">
+          <text>&lt; 10000</text>
+        </inputEntry>
+        <outputEntry id="Rule_5_out">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_6">
+        <inputEntry id="Rule_6_in_1">
+          <text>&gt; 10000</text>
+        </inputEntry>
+        <inputEntry id="Rule_6_in_2">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="Rule_6_in_3">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="Rule_6_out">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

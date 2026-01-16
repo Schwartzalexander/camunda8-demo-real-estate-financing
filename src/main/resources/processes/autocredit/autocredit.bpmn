@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_MaDn_Game" targetNamespace="http://example.com/mensch-aerger-dich-nicht" exporter="Camunda Modeler" exporterVersion="5.42.0">
+  <bpmn:process id="RealEstateAutoCredit" name="Real estate auto credit" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_CreditApplication" name="User starts credit application">
+      <bpmn:outgoing>Flow_1ta8xbz</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_ContractConcluded" name="Credit contract concluded">
+      <bpmn:incoming>Flow_18r9xvh</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_EnterAutoCreditParameters" name="User enters credit parameters">
+      <bpmn:incoming>Flow_1ta8xbz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1pqrgwi</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1ta8xbz" sourceRef="StartEvent_CreditApplication" targetRef="Task_EnterAutoCreditParameters" />
+    <bpmn:sequenceFlow id="Flow_1pqrgwi" sourceRef="Task_EnterAutoCreditParameters" targetRef="Activity_GetCheapestOffer" />
+    <bpmn:serviceTask id="Activity_GetCheapestOffer" name="Get cheapest offer" camunda:asyncBefore="true" camunda:delegateExpression="${getCheapestOfferDelegate}">
+      <bpmn:extensionElements>
+        <camunda:failedJobRetryTimeCycle>R10/PT1M</camunda:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1pqrgwi</bpmn:incoming>
+      <bpmn:outgoing>Flow_14ul2yb</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_CreateContractPDF" name="Create contract PDF" camunda:delegateExpression="${createContractPdfDelegate}">
+      <bpmn:incoming>Flow_14ul2yb</bpmn:incoming>
+      <bpmn:outgoing>Flow_18r9xvh</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_14ul2yb" sourceRef="Activity_GetCheapestOffer" targetRef="Activity_CreateContractPDF" />
+    <bpmn:sequenceFlow id="Flow_18r9xvh" sourceRef="Activity_CreateContractPDF" targetRef="EndEvent_ContractConcluded" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Game">
+    <bpmndi:BPMNPlane id="BPMNPlane_Game" bpmnElement="RealEstateAutoCredit">
+      <bpmndi:BPMNShape id="Shape_StartEvent_GameStarted" bpmnElement="StartEvent_CreditApplication">
+        <dc:Bounds x="180" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="156" y="152" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_GameFinished" bpmnElement="EndEvent_ContractConcluded">
+        <dc:Bounds x="732" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="715" y="145" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1bf3p1q_di" bpmnElement="Task_EnterAutoCreditParameters">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05e0zhp_di" bpmnElement="Activity_GetCheapestOffer">
+        <dc:Bounds x="430" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fhuxmr_di" bpmnElement="Activity_CreateContractPDF">
+        <dc:Bounds x="590" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1ta8xbz_di" bpmnElement="Flow_1ta8xbz">
+        <di:waypoint x="216" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pqrgwi_di" bpmnElement="Flow_1pqrgwi">
+        <di:waypoint x="370" y="120" />
+        <di:waypoint x="430" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14ul2yb_di" bpmnElement="Flow_14ul2yb">
+        <di:waypoint x="530" y="120" />
+        <di:waypoint x="590" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18r9xvh_di" bpmnElement="Flow_18r9xvh">
+        <di:waypoint x="690" y="120" />
+        <di:waypoint x="732" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

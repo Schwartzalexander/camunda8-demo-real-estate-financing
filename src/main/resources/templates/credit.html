@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Credit Comparison</title>
+    <link rel="stylesheet" th:href="@{/css/credit.css}"/>
+</head>
+<body>
+<div class="page">
+    <header class="header">
+        <div>
+            <h1>Real Estate Credit Application</h1>
+            <p class="sub">Compare offers, select a bank, submit your application, and sign the contract.</p>
+        </div>
+    </header>
+
+    <main class="card">
+        <section class="form-section">
+            <h2>Input</h2>
+
+            <form class="form" th:action="@{/credit/compare}" method="post">
+                <div class="grid">
+                    <label class="field">
+                        <span>Monthly net income (€)</span>
+                        <input type="number" name="monthlyNetIncome" step="0.01" min="0"
+                               th:value="${monthlyNetIncome}" required/>
+                    </label>
+
+                    <label class="field">
+                        <span>Property value (€)</span>
+                        <input type="number" name="propertyValue" step="0.01" min="0"
+                               th:value="${propertyValue}" required/>
+                    </label>
+
+                    <label class="field">
+                        <span>Equity (€)</span>
+                        <input type="number" name="equity" step="0.01" min="0"
+                               th:value="${equity}" required/>
+                    </label>
+                </div>
+
+                <div class="actions">
+                    <button class="btn primary" type="submit">Compare</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="results" th:if="${offers != null and !offers.isEmpty()}">
+            <h2>Offers</h2>
+
+            <div class="offer" th:each="offer : ${offers}">
+                <div class="offer-row">
+                    <div class="offer-main">
+                        <div class="bank" th:text="${offer.bankName}">Bank A</div>
+                        <div class="rate">
+                            <span class="label">Interest rate</span>
+                            <span class="value" th:text="${#numbers.formatDecimal(offer.interestRate, 1, 2)} + ' %'">3.10 %</span>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/credit/select}" method="post" class="offer-actions">
+                        <input type="hidden" name="bankName" th:value="${offer.bankName}"/>
+                        <input type="hidden" name="processInstanceId" th:value="${processInstanceId}"/>
+                        <input type="hidden" name="monthlyNetIncome" th:value="${monthlyNetIncome}"/>
+                        <input type="hidden" name="propertyValue" th:value="${propertyValue}"/>
+                        <input type="hidden" name="equity" th:value="${equity}"/>
+
+                        <button class="btn" type="submit">Select</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="status" th:if="${statusMessage != null}">
+            <div class="status-box" th:classappend="${statusType}">
+                <span class="status-title" th:text="${statusTitle}">Status</span>
+                <p class="status-text" th:text="${statusMessage}">Message</p>
+            </div>
+        </section>
+
+        <!-- Decision result after /select -->
+        <section class="decision" th:if="${applicationAccepted != null}">
+            <!-- applicationAccepted -->
+            <div class="status-box success" th:if="${applicationAccepted == true}">
+                <span class="status-title">Approved</span>
+                <p class="status-text">
+                    Contract number:
+                    <strong th:text="${contractNumber}">BANK-123-ABC</strong>
+                </p>
+
+                <form th:action="@{/credit/sign}" method="post" class="actions">
+                    <input type="hidden" name="processInstanceId" th:value="${processInstanceId}"/>
+                    <input type="hidden" name="contractNumber" th:value="${contractNumber}"/>
+                    <button class="btn primary" type="submit">Sign</button>
+                </form>
+
+                <p class="hint">Signing completes the process.</p>
+            </div>
+
+            <!-- Rejected -->
+            <div class="status-box danger" th:if="${applicationAccepted == false}">
+                <span class="status-title">Rejected</span>
+                <p class="status-text" th:text="${rejectionReason}">
+                    Reason
+                </p>
+                <p class="hint">The process is finished.</p>
+            </div>
+        </section>
+
+
+    </main>
+
+    <footer class="footer">
+        <span>Camunda BPM + Spring Boot + Thymeleaf demo</span>
+    </footer>
+</div>
+</body>
+</html>

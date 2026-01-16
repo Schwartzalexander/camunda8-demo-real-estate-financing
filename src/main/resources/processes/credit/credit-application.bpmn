@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_MaDn_Game" targetNamespace="http://example.com/mensch-aerger-dich-nicht" exporter="Camunda Modeler" exporterVersion="5.42.0">
+  <bpmn:process id="RealEstateCreditApplication" name="Real estate credit application" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_CreditApplication" name="User starts credit application">
+      <bpmn:outgoing>Flow_1ta8xbz</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_ContractConcluded" name="Credit contract concluded">
+      <bpmn:incoming>Flow_1jptx6s</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_ApplicationNotAccepted" name="No" sourceRef="Gateway_ApplicationReview" targetRef="EndEvent_ContractCancelled">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${applicationAccepted != true}
+			</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:callActivity id="Call_Credit_Comparison" name="Credit comparison" calledElement="Call_Credit_Comparison">
+      <bpmn:extensionElements>
+        <camunda:in source="monthlyNetIncome" target="monthlyNetIncome" />
+        <camunda:in source="propertyValue" target="propertyValue" />
+        <camunda:in source="equity" target="equity" />
+        <camunda:out source="creditOffers" target="creditOffers" />
+        <camunda:in source="userId" target="userId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0vysej9</bpmn:incoming>
+      <bpmn:outgoing>Flow_12a2vnb</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_0vysej9" sourceRef="Task_EnterCreditParameters" targetRef="Call_Credit_Comparison" />
+    <bpmn:userTask id="Task_BankSelection" name="User selects bank">
+      <bpmn:incoming>Flow_12a2vnb</bpmn:incoming>
+      <bpmn:outgoing>Flow_194lp6r</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_12a2vnb" sourceRef="Call_Credit_Comparison" targetRef="Task_BankSelection" />
+    <bpmn:userTask id="Task_SubmitApplication" name="User submits application">
+      <bpmn:incoming>Flow_194lp6r</bpmn:incoming>
+      <bpmn:outgoing>Flow_1bqavv7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_194lp6r" sourceRef="Task_BankSelection" targetRef="Task_SubmitApplication" />
+    <bpmn:exclusiveGateway id="Gateway_ApplicationReview" name="Bank accepts application">
+      <bpmn:incoming>Flow_1537eeg</bpmn:incoming>
+      <bpmn:outgoing>Flow_ApplicationNotAccepted</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1537eeg" sourceRef="Task_ReviewCreditApplication" targetRef="Gateway_ApplicationReview" />
+    <bpmn:serviceTask id="Task_ReviewCreditApplication" name="Bank reviews credit application" camunda:delegateExpression="${reviewCreditApplicationDelegate}">
+      <bpmn:incoming>Flow_1bqavv7</bpmn:incoming>
+      <bpmn:outgoing>Flow_1537eeg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1bqavv7" sourceRef="Task_SubmitApplication" targetRef="Task_ReviewCreditApplication" />
+    <bpmn:serviceTask id="Task_SendContract" name="Bank sends signed contract" camunda:delegateExpression="${sendContractDelegate}">
+      <bpmn:outgoing>Flow_0bwcnok</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_ApplicationAccepted" name="Yes" sourceRef="Gateway_ApplicationReview" targetRef="Task_SendContract">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${applicationAccepted == true}
+			</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Task_SignContract" name="User signs contract">
+      <bpmn:incoming>Flow_0bwcnok</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jptx6s</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0bwcnok" sourceRef="Task_SendContract" targetRef="Task_SignContract" />
+    <bpmn:sequenceFlow id="Flow_1jptx6s" sourceRef="Task_SignContract" targetRef="EndEvent_ContractConcluded" />
+    <bpmn:endEvent id="EndEvent_ContractCancelled" name="Credit contract cancelled">
+      <bpmn:incoming>Flow_ApplicationNotAccepted</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_EnterCreditParameters" name="User enters credit parameters">
+      <bpmn:incoming>Flow_1ta8xbz</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vysej9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1ta8xbz" sourceRef="StartEvent_CreditApplication" targetRef="Task_EnterCreditParameters" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Game">
+    <bpmndi:BPMNPlane id="BPMNPlane_Game" bpmnElement="RealEstateCreditApplication">
+      <bpmndi:BPMNShape id="Shape_StartEvent_GameStarted" bpmnElement="StartEvent_CreditApplication">
+        <dc:Bounds x="180" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="156" y="222" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_GameFinished" bpmnElement="EndEvent_ContractConcluded">
+        <dc:Bounds x="1502" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1485" y="215" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0bl3s3e_di" bpmnElement="Call_Credit_Comparison">
+        <dc:Bounds x="430" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0xkgrst_di" bpmnElement="Task_BankSelection">
+        <dc:Bounds x="590" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ijl0px_di" bpmnElement="Task_SubmitApplication">
+        <dc:Bounds x="750" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_14bx4kx_di" bpmnElement="Gateway_ApplicationReview" isMarkerVisible="true">
+        <dc:Bounds x="1065" y="165" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1057" y="222" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04zqdx5_di" bpmnElement="Task_ReviewCreditApplication">
+        <dc:Bounds x="910" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_03hi668_di" bpmnElement="Task_SendContract">
+        <dc:Bounds x="1170" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0bxjqql_di" bpmnElement="Task_SignContract">
+        <dc:Bounds x="1330" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0kmmcca_di" bpmnElement="EndEvent_ContractCancelled">
+        <dc:Bounds x="1502" y="84" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1485" y="127" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1bf3p1q_di" bpmnElement="Task_EnterCreditParameters">
+        <dc:Bounds x="270" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_TurnLoop_To_End" bpmnElement="Flow_ApplicationNotAccepted">
+        <di:waypoint x="1090" y="165" />
+        <di:waypoint x="1090" y="102" />
+        <di:waypoint x="1500" y="102" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1102" y="151" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vysej9_di" bpmnElement="Flow_0vysej9">
+        <di:waypoint x="370" y="190" />
+        <di:waypoint x="430" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12a2vnb_di" bpmnElement="Flow_12a2vnb">
+        <di:waypoint x="530" y="190" />
+        <di:waypoint x="590" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_194lp6r_di" bpmnElement="Flow_194lp6r">
+        <di:waypoint x="690" y="190" />
+        <di:waypoint x="750" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1537eeg_di" bpmnElement="Flow_1537eeg">
+        <di:waypoint x="1010" y="190" />
+        <di:waypoint x="1065" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bqavv7_di" bpmnElement="Flow_1bqavv7">
+        <di:waypoint x="850" y="190" />
+        <di:waypoint x="910" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1cj2rlr_di" bpmnElement="Flow_ApplicationAccepted">
+        <di:waypoint x="1115" y="190" />
+        <di:waypoint x="1170" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1134" y="172" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0bwcnok_di" bpmnElement="Flow_0bwcnok">
+        <di:waypoint x="1270" y="190" />
+        <di:waypoint x="1330" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jptx6s_di" bpmnElement="Flow_1jptx6s">
+        <di:waypoint x="1430" y="190" />
+        <di:waypoint x="1502" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ta8xbz_di" bpmnElement="Flow_1ta8xbz">
+        <di:waypoint x="216" y="190" />
+        <di:waypoint x="270" y="190" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
