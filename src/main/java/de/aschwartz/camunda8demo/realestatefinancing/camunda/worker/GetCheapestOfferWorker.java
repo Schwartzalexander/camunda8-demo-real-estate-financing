@@ -1,7 +1,7 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
-import de.aschwartz.camunda7demo.realestatefinancing.model.OffersRequest;
-import de.aschwartz.camunda7demo.realestatefinancing.model.OffersResponse;
+import de.aschwartz.camunda8demo.realestatefinancing.model.OffersRequest;
+import de.aschwartz.camunda8demo.realestatefinancing.model.OffersResponse;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +27,8 @@ public class GetCheapestOfferWorker {
 
 	public GetCheapestOfferWorker(
 			WebClient.Builder webClientBuilder,
-			@Value("${camunda7demo.auto-credit.base-url}") String baseUrl,
-			@Value("${camunda7demo.auto-credit.api-path}") String apiPath) {
+			@Value("${camunda8demo.auto-credit.base-url}") String baseUrl,
+			@Value("${camunda8demo.auto-credit.api-path}") String apiPath) {
 		this.webClient = webClientBuilder.baseUrl(baseUrl).build();
 		this.baseUrl = baseUrl;
 		this.apiPath = apiPath;
@@ -36,8 +36,8 @@ public class GetCheapestOfferWorker {
 
 	@JobWorker(type = "get-cheapest-offer", timeout = 120_000)
 	public Map<String, Object> handle(Map<String, Object> variables) {
-		BigDecimal propertyValue = VariableMapper.getBigDecimal(variables, "propertyValue");
-		BigDecimal equity = VariableMapper.getBigDecimal(variables, "equity");
+		BigDecimal propertyValue = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "propertyValue");
+		BigDecimal equity = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "equity");
 
 		BigDecimal kreditbetrag = propertyValue.subtract(equity);
 

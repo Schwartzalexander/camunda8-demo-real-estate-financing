@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.logic;
+package de.aschwartz.camunda8demo.realestatefinancing.logic;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import org.springframework.stereotype.Service;

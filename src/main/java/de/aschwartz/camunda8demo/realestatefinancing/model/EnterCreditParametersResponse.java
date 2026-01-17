@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.model;
+package de.aschwartz.camunda8demo.realestatefinancing.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,5 +14,5 @@ public class EnterCreditParametersResponse {
 	/**
 	 * List of offers produced by the comparison process.
 	 */
-	List<Offer> offers;
+	List<de.aschwartz.camunda8demo.realestatefinancing.model.Offer> offers;
 }

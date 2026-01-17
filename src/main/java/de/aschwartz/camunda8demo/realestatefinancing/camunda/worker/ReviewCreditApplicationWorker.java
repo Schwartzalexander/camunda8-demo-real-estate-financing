@@ -1,10 +1,9 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.store.ProcessStateStore;
-import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
-import de.aschwartz.camunda7demo.realestatefinancing.model.ReviewResult;
-import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import de.aschwartz.camunda8demo.realestatefinancing.camunda.store.ProcessStateStore;
+import de.aschwartz.camunda8demo.realestatefinancing.model.Offer;
+import de.aschwartz.camunda8demo.realestatefinancing.model.ReviewResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +31,10 @@ public class ReviewCreditApplicationWorker {
 	@JobWorker(type = "review-credit-application")
 	public Map<String, Object> handle(Map<String, Object> variables) {
 		List<Offer> offers = readOffers(variables.get("creditOffers"));
-		String bankName = VariableMapper.getString(variables, "bankName");
-		BigDecimal monthlyNetIncome = VariableMapper.getBigDecimal(variables, "monthlyNetIncome");
-		BigDecimal propertyValue = VariableMapper.getBigDecimal(variables, "propertyValue");
-		BigDecimal equity = VariableMapper.getBigDecimal(variables, "equity");
+		String bankName = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getString(variables, "bankName");
+		BigDecimal monthlyNetIncome = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "monthlyNetIncome");
+		BigDecimal propertyValue = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "propertyValue");
+		BigDecimal equity = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "equity");
 
 		Offer selectedOffer = offers.stream()
 				.filter(it -> it.getBankName().equals(bankName))
@@ -44,7 +43,7 @@ public class ReviewCreditApplicationWorker {
 
 		ReviewResult result = reviewApplication(monthlyNetIncome, propertyValue, equity, selectedOffer);
 
-		String correlationId = VariableMapper.getString(variables, "correlationId");
+		String correlationId = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getString(variables, "correlationId");
 		if (correlationId != null) {
 			processStateStore.storeReviewResult(correlationId, result);
 		}

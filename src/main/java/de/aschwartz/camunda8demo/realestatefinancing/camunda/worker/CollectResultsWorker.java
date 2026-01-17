@@ -1,7 +1,7 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.store.ProcessStateStore;
-import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
+import de.aschwartz.camunda8demo.realestatefinancing.camunda.store.ProcessStateStore;
+import de.aschwartz.camunda8demo.realestatefinancing.model.Offer;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,9 +25,9 @@ public class CollectResultsWorker {
 
 	@JobWorker(type = "collect-results")
 	public Map<String, Object> handle(Map<String, Object> variables) {
-		BigDecimal interestRateA = VariableMapper.getBigDecimal(variables, "interestRateA");
-		BigDecimal interestRateB = VariableMapper.getBigDecimal(variables, "interestRateB");
-		BigDecimal interestRateC = VariableMapper.getBigDecimal(variables, "interestRateC");
+		BigDecimal interestRateA = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "interestRateA");
+		BigDecimal interestRateB = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "interestRateB");
+		BigDecimal interestRateC = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "interestRateC");
 
 		List<Offer> offers = List.of(
 				new Offer("Hyperbank", interestRateA),
@@ -35,7 +35,7 @@ public class CollectResultsWorker {
 				new Offer("Equity Bank", interestRateC)
 		);
 
-		String correlationId = VariableMapper.getString(variables, "correlationId");
+		String correlationId = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getString(variables, "correlationId");
 		if (correlationId != null) {
 			processStateStore.storeOffers(correlationId, offers);
 		} else {

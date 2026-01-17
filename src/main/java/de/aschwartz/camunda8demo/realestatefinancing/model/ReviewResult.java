@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.model;
+package de.aschwartz.camunda8demo.realestatefinancing.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

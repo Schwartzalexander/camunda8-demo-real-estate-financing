@@ -1,6 +1,6 @@
-package de.aschwartz.camunda7demo.realestatefinancing.controller;
+package de.aschwartz.camunda8demo.realestatefinancing.controller;
 
-import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
+import de.aschwartz.camunda8demo.realestatefinancing.logic.CreateProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,9 +53,9 @@ public class AutocreditController {
 	 * Starts the auto-credit process.
 	 *
 	 * @param monthlyNetIncome monthly net income
-	 * @param propertyValue property value
-	 * @param equity equity amount
-	 * @param model Spring MVC model
+	 * @param propertyValue    property value
+	 * @param equity           equity amount
+	 * @param model            Spring MVC model
 	 * @return view name
 	 */
 	@PostMapping("/start")

@@ -1,7 +1,7 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.aschwartz.camunda7demo.realestatefinancing.model.OffersResponse;
+import de.aschwartz.camunda8demo.realestatefinancing.model.OffersResponse;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -33,7 +33,7 @@ public class CreateContractPdfWorker {
 	private final ObjectMapper objectMapper;
 
 	public CreateContractPdfWorker(
-			@Value("${camunda7demo.pdf-path}") String pdfPath,
+			@Value("${camunda8demo.pdf-path}") String pdfPath,
 			ObjectMapper objectMapper
 	) {
 		this.pdfDir = Path.of(pdfPath);
@@ -54,7 +54,7 @@ public class CreateContractPdfWorker {
 			throw new RuntimeException("Could not create pdf directory: " + pdfDir, e);
 		}
 
-		String correlationId = VariableMapper.getString(variables, "correlationId");
+		String correlationId = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getString(variables, "correlationId");
 		String fileName = "credit-contract-" + correlationId + "-" + LocalDate.now() + ".pdf";
 		Path target = pdfDir.resolve(fileName);
 

@@ -1,7 +1,7 @@
 server:
   port: 8080
 
-camunda7demo:
+camunda8demo:
   pdf-path: 'C:\pdf'
   auto-credit:
     base-url: ''

@@ -1,6 +1,6 @@
-package de.aschwartz.camunda7demo.realestatefinancing.controller;
+package de.aschwartz.camunda8demo.realestatefinancing.controller;
 
-import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
+import de.aschwartz.camunda8demo.realestatefinancing.logic.CreateProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +24,7 @@ public class DmnCreditController {
 	/**
 	 * Creates the controller with required services.
 	 *
-	 * @param createProcessService                    process starter service
+	 * @param createProcessService process starter service
 	 */
 	public DmnCreditController(
 			CreateProcessService createProcessService

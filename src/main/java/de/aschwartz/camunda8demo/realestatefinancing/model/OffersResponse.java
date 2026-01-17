@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.model;
+package de.aschwartz.camunda8demo.realestatefinancing.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -156,6 +156,7 @@ public class OffersResponse implements Serializable {
 		}
 
 		// --------- Optional: JSON serialize/deserialize helper ----------
+
 		/**
 		 * Serializes this offer to JSON.
 		 *
@@ -174,7 +175,7 @@ public class OffersResponse implements Serializable {
 		 * Deserializes a single offer from JSON.
 		 *
 		 * @param mapper object mapper
-		 * @param json JSON payload
+		 * @param json   JSON payload
 		 * @return deserialized offer
 		 */
 		public static Angebot fromJson(ObjectMapper mapper, String json) {
@@ -187,6 +188,7 @@ public class OffersResponse implements Serializable {
 	}
 
 	// JSON helpers for the full response.
+
 	/**
 	 * Serializes this response to JSON.
 	 *
@@ -205,7 +207,7 @@ public class OffersResponse implements Serializable {
 	 * Deserializes a response from JSON.
 	 *
 	 * @param mapper object mapper
-	 * @param json JSON payload
+	 * @param json   JSON payload
 	 * @return deserialized response
 	 */
 	public static OffersResponse fromJson(ObjectMapper mapper, String json) {

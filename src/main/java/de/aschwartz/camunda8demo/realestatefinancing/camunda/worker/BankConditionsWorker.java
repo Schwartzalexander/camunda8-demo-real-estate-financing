@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +34,9 @@ public class BankConditionsWorker {
 	}
 
 	private BigDecimal calculateInterestRate(Map<String, Object> variables, BigDecimal baseRate) {
-		BigDecimal monthlyNetIncome = VariableMapper.getBigDecimal(variables, "monthlyNetIncome");
-		BigDecimal propertyValue = VariableMapper.getBigDecimal(variables, "propertyValue");
-		BigDecimal equity = VariableMapper.getBigDecimal(variables, "equity");
+		BigDecimal monthlyNetIncome = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "monthlyNetIncome");
+		BigDecimal propertyValue = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "propertyValue");
+		BigDecimal equity = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "equity");
 
 		BigDecimal equityRatio =
 				(propertyValue != null && propertyValue.signum() > 0 && equity != null)

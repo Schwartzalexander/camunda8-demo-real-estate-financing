@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -15,7 +15,7 @@ public final class VariableMapper {
 	 * Reads a {@link BigDecimal} from the variables map.
 	 *
 	 * @param variables variables map
-	 * @param key variable key
+	 * @param key       variable key
 	 * @return BigDecimal value or {@code null}
 	 */
 	public static BigDecimal getBigDecimal(Map<String, Object> variables, String key) {
@@ -36,7 +36,7 @@ public final class VariableMapper {
 	 * Reads a string variable.
 	 *
 	 * @param variables variables map
-	 * @param key variable key
+	 * @param key       variable key
 	 * @return string value or {@code null}
 	 */
 	public static String getString(Map<String, Object> variables, String key) {

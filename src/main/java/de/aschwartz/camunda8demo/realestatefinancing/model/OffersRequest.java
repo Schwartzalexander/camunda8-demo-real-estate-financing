@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.model;
+package de.aschwartz.camunda8demo.realestatefinancing.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

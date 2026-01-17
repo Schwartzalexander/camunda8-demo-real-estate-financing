@@ -1,11 +1,11 @@
-package de.aschwartz.camunda7demo.realestatefinancing.controller;
+package de.aschwartz.camunda8demo.realestatefinancing.controller;
 
-import de.aschwartz.camunda7demo.realestatefinancing.camunda.store.ProcessStateStore;
-import de.aschwartz.camunda7demo.realestatefinancing.logic.CreditInteractionService;
-import de.aschwartz.camunda7demo.realestatefinancing.logic.CreateProcessService;
-import de.aschwartz.camunda7demo.realestatefinancing.model.EnterCreditParametersResponse;
-import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
-import de.aschwartz.camunda7demo.realestatefinancing.model.SubmitApplicationResponse;
+import de.aschwartz.camunda8demo.realestatefinancing.camunda.store.ProcessStateStore;
+import de.aschwartz.camunda8demo.realestatefinancing.logic.CreateProcessService;
+import de.aschwartz.camunda8demo.realestatefinancing.logic.CreditInteractionService;
+import de.aschwartz.camunda8demo.realestatefinancing.model.EnterCreditParametersResponse;
+import de.aschwartz.camunda8demo.realestatefinancing.model.Offer;
+import de.aschwartz.camunda8demo.realestatefinancing.model.SubmitApplicationResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,9 +33,9 @@ public class CreditController {
 	/**
 	 * Creates the controller with required services.
 	 *
-	 * @param createProcessService process starter service
+	 * @param createProcessService     process starter service
 	 * @param creditInteractionService service for publishing user events
-	 * @param processStateStore process state store
+	 * @param processStateStore        process state store
 	 */
 	public CreditController(
 			CreateProcessService createProcessService,
@@ -68,9 +68,9 @@ public class CreditController {
 	 * Starts the comparison sub-process and fetches offers.
 	 *
 	 * @param monthlyNetIncome monthly net income
-	 * @param propertyValue property value
-	 * @param equity equity amount
-	 * @param model Spring MVC model
+	 * @param propertyValue    property value
+	 * @param equity           equity amount
+	 * @param model            Spring MVC model
 	 * @return view name
 	 */
 	@PostMapping("/compare")
@@ -115,9 +115,9 @@ public class CreditController {
 	/**
 	 * Selects a bank and submits the application.
 	 *
-	 * @param bankName selected bank name
+	 * @param bankName          selected bank name
 	 * @param processInstanceId Camunda process instance id
-	 * @param model Spring MVC model
+	 * @param model             Spring MVC model
 	 * @return view name
 	 */
 	@PostMapping("/select")
@@ -143,7 +143,7 @@ public class CreditController {
 	 * Submits the credit application after a bank was selected.
 	 *
 	 * @param processInstanceId Camunda process instance id
-	 * @param model Spring MVC model
+	 * @param model             Spring MVC model
 	 * @return view name
 	 */
 	@PostMapping("/submit")
@@ -167,7 +167,7 @@ public class CreditController {
 	 * Completes the sign-contract user task.
 	 *
 	 * @param processInstanceId Camunda process instance id
-	 * @param model Spring MVC model
+	 * @param model             Spring MVC model
 	 * @return view name
 	 */
 	@PostMapping("/sign")

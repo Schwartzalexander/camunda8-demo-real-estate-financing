@@ -1,6 +1,6 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.worker;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
-import de.aschwartz.camunda7demo.realestatefinancing.model.OffersResponse;
+import de.aschwartz.camunda8demo.realestatefinancing.model.OffersResponse;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import org.springframework.stereotype.Component;
 

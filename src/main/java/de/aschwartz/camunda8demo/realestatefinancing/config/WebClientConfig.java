@@ -1,4 +1,4 @@
-package de.aschwartz.camunda7demo.realestatefinancing.config;
+package de.aschwartz.camunda8demo.realestatefinancing.config;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;

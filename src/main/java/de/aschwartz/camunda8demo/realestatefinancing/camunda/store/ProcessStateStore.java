@@ -1,7 +1,7 @@
-package de.aschwartz.camunda7demo.realestatefinancing.camunda.store;
+package de.aschwartz.camunda8demo.realestatefinancing.camunda.store;
 
-import de.aschwartz.camunda7demo.realestatefinancing.model.Offer;
-import de.aschwartz.camunda7demo.realestatefinancing.model.ReviewResult;
+import de.aschwartz.camunda8demo.realestatefinancing.model.Offer;
+import de.aschwartz.camunda8demo.realestatefinancing.model.ReviewResult;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -24,7 +24,7 @@ public class ProcessStateStore {
 	 * Stores offers for a process instance.
 	 *
 	 * @param correlationId correlation id
-	 * @param offers offers list
+	 * @param offers        offers list
 	 */
 	public void storeOffers(String correlationId, List<Offer> offers) {
 		offersByCorrelationId.put(correlationId, offers);
@@ -44,7 +44,7 @@ public class ProcessStateStore {
 	 * Stores review result for a process instance.
 	 *
 	 * @param correlationId correlation id
-	 * @param result review result
+	 * @param result        review result
 	 */
 	public void storeReviewResult(String correlationId, ReviewResult result) {
 		reviewByCorrelationId.put(correlationId, result);
@@ -64,7 +64,7 @@ public class ProcessStateStore {
 	 * Waits for offers to become available with a timeout.
 	 *
 	 * @param correlationId correlation id
-	 * @param timeout timeout duration
+	 * @param timeout       timeout duration
 	 * @return offers list if available
 	 */
 	public Optional<List<Offer>> awaitOffers(String correlationId, Duration timeout) {
@@ -83,7 +83,7 @@ public class ProcessStateStore {
 	 * Waits for review result to become available with a timeout.
 	 *
 	 * @param correlationId correlation id
-	 * @param timeout timeout duration
+	 * @param timeout       timeout duration
 	 * @return review result if available
 	 */
 	public Optional<ReviewResult> awaitReviewResult(String correlationId, Duration timeout) {

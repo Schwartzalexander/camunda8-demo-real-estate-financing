@@ -10,7 +10,7 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>de.aSchwartz.camunda7demo</groupId>
+	<groupId>de.aSchwartz.camunda8demo</groupId>
 	<artifactId>real-estate-financing</artifactId>
 	<version>1.0.0</version>
 	<name>real-estate-financing</name>
