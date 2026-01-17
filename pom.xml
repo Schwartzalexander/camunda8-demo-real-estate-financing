@@ -23,13 +23,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.camunda</groupId>
-			<artifactId>camunda-spring-boot-starter</artifactId>
+			<artifactId>spring-boot-starter-camunda-sdk</artifactId>
 			<version>${camunda.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<!-- optional -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
