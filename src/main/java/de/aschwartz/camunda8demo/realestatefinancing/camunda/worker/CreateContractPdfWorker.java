@@ -2,8 +2,8 @@ package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.aschwartz.camunda8demo.realestatefinancing.model.OffersResponse;
+import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
-import io.camunda.zeebe.spring.client.annotation.VariablesAsMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -42,7 +42,8 @@ public class CreateContractPdfWorker {
 	}
 
 	@JobWorker(type = "create-contract-pdf", timeout = 120_000)
-	public Map<String, Object> handle(@VariablesAsMap Map<String, Object> variables) {
+	public Map<String, Object> handle(final ActivatedJob job) {
+		Map<String, Object> variables = job.getVariablesAsMap();
 		OffersResponse.Angebot cheapestOffer = readOffer(variables.get("cheapestOffer"));
 
 		if (cheapestOffer == null) {
