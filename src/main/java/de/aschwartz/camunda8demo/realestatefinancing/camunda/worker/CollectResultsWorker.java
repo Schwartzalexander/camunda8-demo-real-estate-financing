@@ -3,6 +3,7 @@ package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 import de.aschwartz.camunda8demo.realestatefinancing.camunda.store.ProcessStateStore;
 import de.aschwartz.camunda8demo.realestatefinancing.model.Offer;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import io.camunda.zeebe.spring.client.annotation.VariablesAsMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ public class CollectResultsWorker {
 	}
 
 	@JobWorker(type = "collect-results")
-	public Map<String, Object> handle(Map<String, Object> variables) {
+	public Map<String, Object> handle(@VariablesAsMap Map<String, Object> variables) {
 		BigDecimal interestRateA = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "interestRateA");
 		BigDecimal interestRateB = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "interestRateB");
 		BigDecimal interestRateC = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "interestRateC");

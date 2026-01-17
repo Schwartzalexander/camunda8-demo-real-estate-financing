@@ -3,6 +3,7 @@ package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 import de.aschwartz.camunda8demo.realestatefinancing.model.OffersRequest;
 import de.aschwartz.camunda8demo.realestatefinancing.model.OffersResponse;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import io.camunda.zeebe.spring.client.annotation.VariablesAsMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -35,7 +36,7 @@ public class GetCheapestOfferWorker {
 	}
 
 	@JobWorker(type = "get-cheapest-offer", timeout = 120_000)
-	public Map<String, Object> handle(Map<String, Object> variables) {
+	public Map<String, Object> handle(@VariablesAsMap Map<String, Object> variables) {
 		BigDecimal propertyValue = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "propertyValue");
 		BigDecimal equity = de.aschwartz.camunda8demo.realestatefinancing.camunda.worker.VariableMapper.getBigDecimal(variables, "equity");
 

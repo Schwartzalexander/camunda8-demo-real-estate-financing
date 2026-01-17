@@ -1,6 +1,7 @@
 package de.aschwartz.camunda8demo.realestatefinancing.camunda.worker;
 
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import io.camunda.zeebe.spring.client.annotation.VariablesAsMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -16,19 +17,19 @@ import java.util.Map;
 public class BankConditionsWorker {
 
 	@JobWorker(type = "request-conditions-bank-a")
-	public Map<String, Object> handleBankA(Map<String, Object> variables) {
+	public Map<String, Object> handleBankA(@VariablesAsMap Map<String, Object> variables) {
 		BigDecimal interestRate = calculateInterestRate(variables, new BigDecimal("3.10"));
 		return Map.of("interestRateA", interestRate);
 	}
 
 	@JobWorker(type = "request-conditions-bank-b")
-	public Map<String, Object> handleBankB(Map<String, Object> variables) {
+	public Map<String, Object> handleBankB(@VariablesAsMap Map<String, Object> variables) {
 		BigDecimal interestRate = calculateInterestRate(variables, new BigDecimal("3.40"));
 		return Map.of("interestRateB", interestRate);
 	}
 
 	@JobWorker(type = "request-conditions-bank-c")
-	public Map<String, Object> handleBankC(Map<String, Object> variables) {
+	public Map<String, Object> handleBankC(@VariablesAsMap Map<String, Object> variables) {
 		BigDecimal interestRate = calculateInterestRate(variables, new BigDecimal("3.25"));
 		return Map.of("interestRateC", interestRate);
 	}
