@@ -1,22 +1,22 @@
 package de.aschwartz.camunda8demo.realestatefinancing.camunda;
 
 import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.command.DeployResourceCommandStep1;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Component
+@Slf4j
 public class CamundaDeploymentRunner implements ApplicationRunner {
-	private static final Logger log = LoggerFactory.getLogger(CamundaDeploymentRunner.class);
+
 	private static final List<String> RESOURCE_PATTERNS = List.of(
 			"classpath*:processes/**/*.bpmn",
 			"classpath*:processes/**/*.dmn"
@@ -42,16 +42,22 @@ public class CamundaDeploymentRunner implements ApplicationRunner {
 			return;
 		}
 
-		DeployResourceCommandStep1 deployCommand = zeebeClient.newDeployResourceCommand();
-		for (Resource resource : resources) {
-			String filename = resource.getFilename();
-			if (filename == null) {
-				filename = resource.getDescription();
-			}
-			deployCommand.addResourceBytes(resource.getInputStream().readAllBytes(), filename);
+		// Step1 -> Step2 happens after the first addResource...
+		Resource first = resources.get(0);
+		var cmd = zeebeClient.newDeployResourceCommand()
+				.addResourceBytes(first.getInputStream().readAllBytes(), filenameOf(first));
+
+		for (int i = 1; i < resources.size(); i++) {
+			Resource r = resources.get(i);
+			cmd = cmd.addResourceBytes(r.getInputStream().readAllBytes(), filenameOf(r));
 		}
 
-		deployCommand.send().join();
-		log.info("Deployed {} BPMN/DMN resources to Camunda 8.", resources.size());
+		cmd.send().join();
+		log.info("Deployed {} BPMN/DMN resources.", resources.size());
+	}
+
+	private static String filenameOf(Resource resource) throws IOException {
+		String filename = resource.getFilename();
+		return (filename != null) ? filename : resource.getDescription();
 	}
 }
