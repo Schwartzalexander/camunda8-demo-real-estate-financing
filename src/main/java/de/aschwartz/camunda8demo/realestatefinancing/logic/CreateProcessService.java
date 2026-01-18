@@ -36,8 +36,11 @@ public class CreateProcessService {
 		try {
 			Map<String, Object> payload = variables != null ? new HashMap<>(variables) : new HashMap<>();
 			String correlationId = payload.containsKey("correlationId")
-					? payload.get("correlationId").toString()
-					: UUID.randomUUID().toString();
+					? String.valueOf(payload.get("correlationId"))
+					: null;
+			if (correlationId == null || correlationId.isBlank()) {
+				correlationId = UUID.randomUUID().toString();
+			}
 			payload.put("correlationId", correlationId);
 			long processInstanceKey = zeebeClient
 					.newCreateInstanceCommand()
