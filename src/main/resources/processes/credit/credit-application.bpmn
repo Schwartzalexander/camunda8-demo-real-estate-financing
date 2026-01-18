@@ -40,7 +40,7 @@
 				<zeebe:calledElement
 						processId="RealEstateCreditComparison"
 						propagateAllChildVariables="true"
-						bindProcessInstanceId="=correlationId"/>
+						bindProcessInstanceId="=comparisonProcessInstanceId"/>
 				<zeebe:ioMapping>
 					<zeebe:input source="=monthlyNetIncome" target="monthlyNetIncome"/>
 					<zeebe:input source="=propertyValue" target="propertyValue"/>
