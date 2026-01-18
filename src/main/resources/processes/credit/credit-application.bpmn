@@ -1,178 +1,220 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
-                  id="Definitions_RealEstateCredit"
-                  targetNamespace="http://example.com/real-estate">
-  <bpmn:message id="Message_BankSelected" name="bank-selected" />
-  <bpmn:message id="Message_ApplicationSubmitted" name="application-submitted" />
-  <bpmn:message id="Message_ContractSigned" name="contract-signed" />
+<bpmn:definitions
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+        id="Definitions_RealEstateCredit"
+        targetNamespace="http://example.com/real-estate">
 
-  <bpmn:process id="RealEstateCreditApplication" name="Real estate credit application" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_CreditApplication" name="Credit application started">
-      <bpmn:outgoing>Flow_StartToCompare</bpmn:outgoing>
-    </bpmn:startEvent>
+	<!-- Messages (subscription MUST be here exactly once per message) -->
+	<bpmn:message id="Message_BankSelected" name="bank-selected">
+		<bpmn:extensionElements>
+			<zeebe:subscription correlationKey="=correlationId"/>
+		</bpmn:extensionElements>
+	</bpmn:message>
 
-    <bpmn:callActivity id="Call_Credit_Comparison" name="Credit comparison">
-      <bpmn:extensionElements>
-        <zeebe:calledElement processId="RealEstateCreditComparison" propagateAllChildVariables="true" />
-        <zeebe:ioMapping>
-          <zeebe:input source="monthlyNetIncome" target="monthlyNetIncome" />
-          <zeebe:input source="propertyValue" target="propertyValue" />
-          <zeebe:input source="equity" target="equity" />
-          <zeebe:input source="correlationId" target="correlationId" />
-        </zeebe:ioMapping>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_StartToCompare</bpmn:incoming>
-      <bpmn:outgoing>Flow_CompareToBankSelected</bpmn:outgoing>
-    </bpmn:callActivity>
+	<bpmn:message id="Message_ApplicationSubmitted" name="application-submitted">
+		<bpmn:extensionElements>
+			<zeebe:subscription correlationKey="=correlationId"/>
+		</bpmn:extensionElements>
+	</bpmn:message>
 
-    <bpmn:intermediateCatchEvent id="Catch_BankSelected" name="Bank selected">
-      <bpmn:extensionElements>
-        <zeebe:subscription correlationKey="correlationId" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_CompareToBankSelected</bpmn:incoming>
-      <bpmn:outgoing>Flow_BankSelectedToSubmit</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_BankSelected" />
-    </bpmn:intermediateCatchEvent>
+	<bpmn:message id="Message_ContractSigned" name="contract-signed">
+		<bpmn:extensionElements>
+			<zeebe:subscription correlationKey="=correlationId"/>
+		</bpmn:extensionElements>
+	</bpmn:message>
 
-    <bpmn:intermediateCatchEvent id="Catch_ApplicationSubmitted" name="Application submitted">
-      <bpmn:extensionElements>
-        <zeebe:subscription correlationKey="correlationId" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_BankSelectedToSubmit</bpmn:incoming>
-      <bpmn:outgoing>Flow_SubmitToReview</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_ApplicationSubmitted" />
-    </bpmn:intermediateCatchEvent>
+	<bpmn:process id="RealEstateCreditApplication"
+				  name="Real estate credit application"
+				  isExecutable="true">
 
-    <bpmn:serviceTask id="Task_ReviewCreditApplication" name="Bank reviews credit application">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="review-credit-application" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_SubmitToReview</bpmn:incoming>
-      <bpmn:outgoing>Flow_ReviewToGateway</bpmn:outgoing>
-    </bpmn:serviceTask>
+		<bpmn:startEvent id="StartEvent_CreditApplication"
+						 name="Credit application started">
+			<bpmn:outgoing>Flow_StartToCompare</bpmn:outgoing>
+		</bpmn:startEvent>
 
-    <bpmn:exclusiveGateway id="Gateway_ApplicationReview" name="Bank accepts application">
-      <bpmn:incoming>Flow_ReviewToGateway</bpmn:incoming>
-      <bpmn:outgoing>Flow_ApplicationAccepted</bpmn:outgoing>
-      <bpmn:outgoing>Flow_ApplicationNotAccepted</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
+		<bpmn:callActivity id="Call_Credit_Comparison"
+						   name="Credit comparison">
+			<bpmn:extensionElements>
+				<zeebe:calledElement
+						processId="RealEstateCreditComparison"
+						propagateAllChildVariables="true"/>
+				<zeebe:ioMapping>
+					<zeebe:input source="monthlyNetIncome" target="monthlyNetIncome"/>
+					<zeebe:input source="propertyValue" target="propertyValue"/>
+					<zeebe:input source="equity" target="equity"/>
+					<zeebe:input source="correlationId" target="correlationId"/>
+				</zeebe:ioMapping>
+			</bpmn:extensionElements>
+			<bpmn:incoming>Flow_StartToCompare</bpmn:incoming>
+			<bpmn:outgoing>Flow_CompareToBankSelected</bpmn:outgoing>
+		</bpmn:callActivity>
 
-    <bpmn:sequenceFlow id="Flow_ApplicationAccepted" name="Yes" sourceRef="Gateway_ApplicationReview" targetRef="Task_SendContract">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=applicationAccepted = true</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_ApplicationNotAccepted" name="No" sourceRef="Gateway_ApplicationReview" targetRef="EndEvent_ContractCancelled">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(applicationAccepted)</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+		<bpmn:intermediateCatchEvent id="Catch_BankSelected"
+									 name="Bank selected">
+			<bpmn:incoming>Flow_CompareToBankSelected</bpmn:incoming>
+			<bpmn:outgoing>Flow_BankSelectedToSubmit</bpmn:outgoing>
+			<bpmn:messageEventDefinition messageRef="Message_BankSelected"/>
+		</bpmn:intermediateCatchEvent>
 
-    <bpmn:serviceTask id="Task_SendContract" name="Bank sends signed contract">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="send-contract" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_ApplicationAccepted</bpmn:incoming>
-      <bpmn:outgoing>Flow_SendContractToSign</bpmn:outgoing>
-    </bpmn:serviceTask>
+		<bpmn:intermediateCatchEvent id="Catch_ApplicationSubmitted"
+									 name="Application submitted">
+			<bpmn:incoming>Flow_BankSelectedToSubmit</bpmn:incoming>
+			<bpmn:outgoing>Flow_SubmitToReview</bpmn:outgoing>
+			<bpmn:messageEventDefinition messageRef="Message_ApplicationSubmitted"/>
+		</bpmn:intermediateCatchEvent>
 
-    <bpmn:intermediateCatchEvent id="Catch_ContractSigned" name="Contract signed">
-      <bpmn:extensionElements>
-        <zeebe:subscription correlationKey="correlationId" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_SendContractToSign</bpmn:incoming>
-      <bpmn:outgoing>Flow_SignedToEnd</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_ContractSigned" />
-    </bpmn:intermediateCatchEvent>
+		<bpmn:serviceTask id="Task_ReviewCreditApplication"
+						  name="Bank reviews credit application">
+			<bpmn:extensionElements>
+				<zeebe:taskDefinition type="review-credit-application"/>
+			</bpmn:extensionElements>
+			<bpmn:incoming>Flow_SubmitToReview</bpmn:incoming>
+			<bpmn:outgoing>Flow_ReviewToGateway</bpmn:outgoing>
+		</bpmn:serviceTask>
 
-    <bpmn:endEvent id="EndEvent_ContractConcluded" name="Credit contract concluded">
-      <bpmn:incoming>Flow_SignedToEnd</bpmn:incoming>
-    </bpmn:endEvent>
+		<bpmn:exclusiveGateway id="Gateway_ApplicationReview"
+							   name="Bank accepts application">
+			<bpmn:incoming>Flow_ReviewToGateway</bpmn:incoming>
+			<bpmn:outgoing>Flow_ApplicationAccepted</bpmn:outgoing>
+			<bpmn:outgoing>Flow_ApplicationNotAccepted</bpmn:outgoing>
+		</bpmn:exclusiveGateway>
 
-    <bpmn:endEvent id="EndEvent_ContractCancelled" name="Credit contract cancelled">
-      <bpmn:incoming>Flow_ApplicationNotAccepted</bpmn:incoming>
-    </bpmn:endEvent>
+		<bpmn:sequenceFlow id="Flow_ApplicationAccepted"
+						   name="Yes"
+						   sourceRef="Gateway_ApplicationReview"
+						   targetRef="Task_SendContract">
+			<bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=applicationAccepted = true
+			</bpmn:conditionExpression>
+		</bpmn:sequenceFlow>
 
-    <bpmn:sequenceFlow id="Flow_StartToCompare" sourceRef="StartEvent_CreditApplication" targetRef="Call_Credit_Comparison" />
-    <bpmn:sequenceFlow id="Flow_CompareToBankSelected" sourceRef="Call_Credit_Comparison" targetRef="Catch_BankSelected" />
-    <bpmn:sequenceFlow id="Flow_BankSelectedToSubmit" sourceRef="Catch_BankSelected" targetRef="Catch_ApplicationSubmitted" />
-    <bpmn:sequenceFlow id="Flow_SubmitToReview" sourceRef="Catch_ApplicationSubmitted" targetRef="Task_ReviewCreditApplication" />
-    <bpmn:sequenceFlow id="Flow_ReviewToGateway" sourceRef="Task_ReviewCreditApplication" targetRef="Gateway_ApplicationReview" />
-    <bpmn:sequenceFlow id="Flow_SendContractToSign" sourceRef="Task_SendContract" targetRef="Catch_ContractSigned" />
-    <bpmn:sequenceFlow id="Flow_SignedToEnd" sourceRef="Catch_ContractSigned" targetRef="EndEvent_ContractConcluded" />
-  </bpmn:process>
+		<bpmn:sequenceFlow id="Flow_ApplicationNotAccepted"
+						   name="No"
+						   sourceRef="Gateway_ApplicationReview"
+						   targetRef="EndEvent_ContractCancelled">
+			<bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(applicationAccepted)
+			</bpmn:conditionExpression>
+		</bpmn:sequenceFlow>
 
-  <bpmndi:BPMNDiagram id="BPMNDiagram_CreditApplication">
-    <bpmndi:BPMNPlane id="BPMNPlane_CreditApplication" bpmnElement="RealEstateCreditApplication">
-      <bpmndi:BPMNShape id="Shape_StartEvent_CreditApplication" bpmnElement="StartEvent_CreditApplication">
-        <dc:Bounds x="180" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Call_Credit_Comparison" bpmnElement="Call_Credit_Comparison">
-        <dc:Bounds x="270" y="150" width="110" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Catch_BankSelected" bpmnElement="Catch_BankSelected">
-        <dc:Bounds x="430" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Catch_ApplicationSubmitted" bpmnElement="Catch_ApplicationSubmitted">
-        <dc:Bounds x="520" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Review" bpmnElement="Task_ReviewCreditApplication">
-        <dc:Bounds x="610" y="150" width="120" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Gateway_Review" bpmnElement="Gateway_ApplicationReview" isMarkerVisible="true">
-        <dc:Bounds x="770" y="165" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_SendContract" bpmnElement="Task_SendContract">
-        <dc:Bounds x="860" y="150" width="120" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Catch_ContractSigned" bpmnElement="Catch_ContractSigned">
-        <dc:Bounds x="1030" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_EndEvent_Concluded" bpmnElement="EndEvent_ContractConcluded">
-        <dc:Bounds x="1120" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_EndEvent_Cancelled" bpmnElement="EndEvent_ContractCancelled">
-        <dc:Bounds x="1120" y="92" width="36" height="36" />
-      </bpmndi:BPMNShape>
+		<bpmn:serviceTask id="Task_SendContract"
+						  name="Bank sends signed contract">
+			<bpmn:extensionElements>
+				<zeebe:taskDefinition type="send-contract"/>
+			</bpmn:extensionElements>
+			<bpmn:incoming>Flow_ApplicationAccepted</bpmn:incoming>
+			<bpmn:outgoing>Flow_SendContractToSign</bpmn:outgoing>
+		</bpmn:serviceTask>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_StartToCompare" bpmnElement="Flow_StartToCompare">
-        <di:waypoint x="216" y="190" />
-        <di:waypoint x="270" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_CompareToBankSelected" bpmnElement="Flow_CompareToBankSelected">
-        <di:waypoint x="380" y="190" />
-        <di:waypoint x="430" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_BankSelectedToSubmit" bpmnElement="Flow_BankSelectedToSubmit">
-        <di:waypoint x="466" y="190" />
-        <di:waypoint x="520" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_SubmitToReview" bpmnElement="Flow_SubmitToReview">
-        <di:waypoint x="556" y="190" />
-        <di:waypoint x="610" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_ReviewToGateway" bpmnElement="Flow_ReviewToGateway">
-        <di:waypoint x="730" y="190" />
-        <di:waypoint x="770" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_ApplicationAccepted" bpmnElement="Flow_ApplicationAccepted">
-        <di:waypoint x="820" y="190" />
-        <di:waypoint x="860" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_SendContractToSign" bpmnElement="Flow_SendContractToSign">
-        <di:waypoint x="980" y="190" />
-        <di:waypoint x="1030" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_SignedToEnd" bpmnElement="Flow_SignedToEnd">
-        <di:waypoint x="1066" y="190" />
-        <di:waypoint x="1120" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_ApplicationNotAccepted" bpmnElement="Flow_ApplicationNotAccepted">
-        <di:waypoint x="795" y="165" />
-        <di:waypoint x="795" y="110" />
-        <di:waypoint x="1120" y="110" />
-      </bpmndi:BPMNEdge>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
+		<bpmn:intermediateCatchEvent id="Catch_ContractSigned"
+									 name="Contract signed">
+			<bpmn:incoming>Flow_SendContractToSign</bpmn:incoming>
+			<bpmn:outgoing>Flow_SignedToEnd</bpmn:outgoing>
+			<bpmn:messageEventDefinition messageRef="Message_ContractSigned"/>
+		</bpmn:intermediateCatchEvent>
+
+		<bpmn:endEvent id="EndEvent_ContractConcluded"
+					   name="Credit contract concluded">
+			<bpmn:incoming>Flow_SignedToEnd</bpmn:incoming>
+		</bpmn:endEvent>
+
+		<bpmn:endEvent id="EndEvent_ContractCancelled"
+					   name="Credit contract cancelled">
+			<bpmn:incoming>Flow_ApplicationNotAccepted</bpmn:incoming>
+		</bpmn:endEvent>
+
+		<bpmn:sequenceFlow id="Flow_StartToCompare"
+						   sourceRef="StartEvent_CreditApplication"
+						   targetRef="Call_Credit_Comparison"/>
+		<bpmn:sequenceFlow id="Flow_CompareToBankSelected"
+						   sourceRef="Call_Credit_Comparison"
+						   targetRef="Catch_BankSelected"/>
+		<bpmn:sequenceFlow id="Flow_BankSelectedToSubmit"
+						   sourceRef="Catch_BankSelected"
+						   targetRef="Catch_ApplicationSubmitted"/>
+		<bpmn:sequenceFlow id="Flow_SubmitToReview"
+						   sourceRef="Catch_ApplicationSubmitted"
+						   targetRef="Task_ReviewCreditApplication"/>
+		<bpmn:sequenceFlow id="Flow_ReviewToGateway"
+						   sourceRef="Task_ReviewCreditApplication"
+						   targetRef="Gateway_ApplicationReview"/>
+		<bpmn:sequenceFlow id="Flow_SendContractToSign"
+						   sourceRef="Task_SendContract"
+						   targetRef="Catch_ContractSigned"/>
+		<bpmn:sequenceFlow id="Flow_SignedToEnd"
+						   sourceRef="Catch_ContractSigned"
+						   targetRef="EndEvent_ContractConcluded"/>
+
+	</bpmn:process>
+	<bpmndi:BPMNDiagram id="BPMNDiagram_CreditApplication">
+		<bpmndi:BPMNPlane id="BPMNPlane_CreditApplication" bpmnElement="RealEstateCreditApplication">
+			<bpmndi:BPMNShape id="Shape_StartEvent_CreditApplication" bpmnElement="StartEvent_CreditApplication">
+				<dc:Bounds x="180" y="172" width="36" height="36"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Call_Credit_Comparison" bpmnElement="Call_Credit_Comparison">
+				<dc:Bounds x="270" y="150" width="110" height="80"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Catch_BankSelected" bpmnElement="Catch_BankSelected">
+				<dc:Bounds x="430" y="172" width="36" height="36"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Catch_ApplicationSubmitted" bpmnElement="Catch_ApplicationSubmitted">
+				<dc:Bounds x="520" y="172" width="36" height="36"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Task_Review" bpmnElement="Task_ReviewCreditApplication">
+				<dc:Bounds x="610" y="150" width="120" height="80"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Gateway_Review" bpmnElement="Gateway_ApplicationReview" isMarkerVisible="true">
+				<dc:Bounds x="770" y="165" width="50" height="50"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Task_SendContract" bpmnElement="Task_SendContract">
+				<dc:Bounds x="860" y="150" width="120" height="80"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_Catch_ContractSigned" bpmnElement="Catch_ContractSigned">
+				<dc:Bounds x="1030" y="172" width="36" height="36"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_EndEvent_Concluded" bpmnElement="EndEvent_ContractConcluded">
+				<dc:Bounds x="1120" y="172" width="36" height="36"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape id="Shape_EndEvent_Cancelled" bpmnElement="EndEvent_ContractCancelled">
+				<dc:Bounds x="1120" y="92" width="36" height="36"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNEdge id="Edge_Flow_ApplicationAccepted" bpmnElement="Flow_ApplicationAccepted">
+				<di:waypoint x="820" y="190"/>
+				<di:waypoint x="860" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_ApplicationNotAccepted" bpmnElement="Flow_ApplicationNotAccepted">
+				<di:waypoint x="795" y="165"/>
+				<di:waypoint x="795" y="110"/>
+				<di:waypoint x="1120" y="110"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_StartToCompare" bpmnElement="Flow_StartToCompare">
+				<di:waypoint x="216" y="190"/>
+				<di:waypoint x="270" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_CompareToBankSelected" bpmnElement="Flow_CompareToBankSelected">
+				<di:waypoint x="380" y="190"/>
+				<di:waypoint x="430" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_BankSelectedToSubmit" bpmnElement="Flow_BankSelectedToSubmit">
+				<di:waypoint x="466" y="190"/>
+				<di:waypoint x="520" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_SubmitToReview" bpmnElement="Flow_SubmitToReview">
+				<di:waypoint x="556" y="190"/>
+				<di:waypoint x="610" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_ReviewToGateway" bpmnElement="Flow_ReviewToGateway">
+				<di:waypoint x="730" y="190"/>
+				<di:waypoint x="770" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_SendContractToSign" bpmnElement="Flow_SendContractToSign">
+				<di:waypoint x="980" y="190"/>
+				<di:waypoint x="1030" y="190"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge id="Edge_Flow_SignedToEnd" bpmnElement="Flow_SignedToEnd">
+				<di:waypoint x="1066" y="190"/>
+				<di:waypoint x="1120" y="190"/>
+			</bpmndi:BPMNEdge>
+		</bpmndi:BPMNPlane>
+	</bpmndi:BPMNDiagram>
 </bpmn:definitions>
