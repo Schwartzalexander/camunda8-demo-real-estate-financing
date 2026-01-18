@@ -39,7 +39,7 @@
 			<bpmn:extensionElements>
 				<zeebe:calledElement
 						processId="RealEstateCreditComparison"
-						propagateAllChildVariables="true"
+						propagateAllChildVariables="false"
 						bindProcessInstanceId="=comparisonProcessInstanceId"/>
 				<zeebe:ioMapping>
 					<zeebe:input source="=monthlyNetIncome" target="monthlyNetIncome"/>
