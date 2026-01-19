@@ -14,22 +14,30 @@ public final class VariableMapper {
 	/**
 	 * Reads a {@link BigDecimal} from the variables map.
 	 *
-	 * @param variables variables map
-	 * @param key       variable key
+	 * @param vars variables map
+	 * @param key  variable key
 	 * @return BigDecimal value or {@code null}
 	 */
-	public static BigDecimal getBigDecimal(Map<String, Object> variables, String key) {
-		Object value = variables.get(key);
-		if (value == null) {
-			return null;
+	public static BigDecimal getBigDecimal(Map<String, Object> vars, String key) {
+		Object v = vars.get(key);
+		if (v == null) return null;
+
+		if (v instanceof BigDecimal bd) return bd;
+
+		if (v instanceof Number n) {
+			// Zeebe/JSON liefert oft Integer/Long/Double
+			return BigDecimal.valueOf(n.doubleValue());
 		}
-		if (value instanceof BigDecimal bigDecimal) {
-			return bigDecimal;
+
+		if (v instanceof String s) {
+			s = s.trim();
+			if (s.isEmpty()) return null;
+			// falls jemand "4.000,50" eingibt
+			s = s.replace(".", "").replace(",", ".");
+			return new BigDecimal(s);
 		}
-		if (value instanceof Number number) {
-			return BigDecimal.valueOf(number.doubleValue());
-		}
-		return new BigDecimal(value.toString());
+
+		throw new IllegalArgumentException("Variable '" + key + "' has unsupported type: " + v.getClass());
 	}
 
 	/**

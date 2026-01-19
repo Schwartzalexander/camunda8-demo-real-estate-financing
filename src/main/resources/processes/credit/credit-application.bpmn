@@ -29,8 +29,8 @@
 				  name="Real estate credit application"
 				  isExecutable="true">
 
-	<bpmn:startEvent id="StartEvent_CreditApplication"
-					 name="Credit application started">
+		<bpmn:startEvent id="StartEvent_CreditApplication"
+						 name="Credit application started">
 			<bpmn:extensionElements>
 				<zeebe:ioMapping>
 					<zeebe:input source="=if(correlationId != null, correlationId, uuid())" target="correlationId"/>
@@ -51,6 +51,10 @@
 					<zeebe:input source="=propertyValue" target="propertyValue"/>
 					<zeebe:input source="=equity" target="equity"/>
 					<zeebe:input source="=correlationId" target="correlationId"/>
+					<zeebe:output source="=interestRateA" target="interestRateA"/>
+					<zeebe:output source="=interestRateB" target="interestRateB"/>
+					<zeebe:output source="=interestRateC" target="interestRateC"/>
+					<zeebe:output source="=creditOffers" target="creditOffers"/>
 				</zeebe:ioMapping>
 			</bpmn:extensionElements>
 			<bpmn:incoming>Flow_StartToCompare</bpmn:incoming>
